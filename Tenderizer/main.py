@@ -69,6 +69,8 @@ class RegexMatcher(ttk.Frame):
     def __init__(self,master):
 
         ttk.Frame.__init__(self,master)
+        self.dataset=self.master.dataset
+
         self.grid(row=0,column=0,sticky='nsew',padx=5,pady=5)
         self.grid_rowconfigure(1,weight=1)
         self.grid_columnconfigure(0,weight=1)
@@ -78,7 +80,7 @@ class RegexMatcher(ttk.Frame):
         
         self.treeview = app_tk_widgets.components.TreeView(self,'Match View',('Name','Match','New Name'))
         self.treeview.grid(row=1,column=0)
-        self.dataset=self.master.pdf_to_text.dataset
+        
         self.treeview.load_button.configure(command=self.load_dataset,state='normal')
         self.treeview.convert_button.configure(command=self.convert_pdfs,state='normal',text='rename')
 
@@ -89,8 +91,7 @@ class RegexMatcher(ttk.Frame):
 
     def load_dataset(self):
         # Grab the Data that has all pdf path info
-        dataset=self.master.pdf_to_text.dataset
-        self.dataset=dataset
+        dataset=self.dataset
         if dataset:
             # Clear out the treeview
             self.treeview.tree.delete(*self.treeview.tree.get_children())
@@ -123,8 +124,7 @@ class RegexMatcher(ttk.Frame):
 
     def convert_pdfs(self):
         # Grab the Data that has all pdf path info
-        dataset=self.master.pdf_to_text.dataset
-        self.dataset=dataset
+        dataset=self.dataset
         if dataset:
             # Iterate over the data set
             for pdf in dataset:
@@ -188,7 +188,7 @@ class ConvertPdfToText(ttk.Frame):
         self.treeview.load_button.configure(command=self.load_pdfs)
         self.treeview.convert_button.configure(command=self.convert_paths)
         # Holds information about converted PDF's
-        self.dataset=[]
+        self.dataset=self.master.dataset
         #TODO Remove these after testing
         self.input.dir.set("C:\Projects\PDFs\Animals")
         self.input.assert_dir()
@@ -215,7 +215,7 @@ class ConvertPdfToText(ttk.Frame):
         """Convert PDF's to text"""
         for pdf in self.dataset:
             x=execute_pdftotext(
-                exe=Path('pdftotext.exe'),
+                exe=Path('xpdf/pdftotext.exe'),
                 p=Path(pdf.input_path),
                 o=Path(pdf.output_path)
             )
@@ -238,7 +238,7 @@ class ConvertPdfToText(ttk.Frame):
         # Clear contents of the tree view
         self.treeview.tree.delete(*self.treeview.tree.get_children())
         # Empty the data set
-        self.dataset=[]
+        del self.dataset[:]
         # Get the input directory as a path
         p=Path(self.input.dir.get())
         # Get the input directory as a Pure Path
@@ -277,6 +277,9 @@ class App(ttk.Notebook):
     def __init__(self, master):
         ttk.Notebook.__init__(self, master)
         self.grid(sticky='nsew',padx=5,pady=5,ipady=5,ipadx=5)
+        
+        # Contains all info on PDfs for the session
+        self.dataset=[]
 
         self.pdf_to_text=ConvertPdfToText(self)
         self.pdf_Renamer = RegexMatcher(self)

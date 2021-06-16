@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from subprocess import Popen
 import logging
+import json
 logger = logging.getLogger(__name__)
 
 
@@ -18,23 +19,39 @@ def execute_pdftotext(exe,p,o=None):
     # Handles Individual file
     if p.is_file():
         logger.debug('Converting a file')
+        already_existed=False
+        created_dir_structure=False
         args[1]=f'{p}'
         # Handles if the output is a directory or file
         if o:
             if not o.parent.exists():
-                logger.debug(f'{o.parent} Creating Directory Stucture')
+                created_dir_structure=True
                 o.parent.mkdir(parents=True,exist_ok=True)
             if o.exists():
-                logging.info(f'{o.resolve()} already Exists')
+                already_existed=True
             if o.suffix =='.pdf':
                 args[2]=f'{o.resolve()}'.replace('.pdf','.txt')
+            elif o.suffix == '.txt':
+                args[2]=f'{o.resolve()}'
         pdftotext=Popen(
             args
         )
         pdftotext.wait()
         if not pdftotext.returncode == 0:
             logger.debug(pdftotext.returncode)
+        else:
+            dump={
+                'input_path': f'{p.resolve()}',
+                'output_path': f'{o.resolve()}',
+                'already_existed': already_existed,
+                'created_dir_structure': created_dir_structure if not created_dir_structure else f'{o.parent}',
+                'return_code' : pdftotext.returncode
+            }
+            logging.info(
+                json.dumps(dump)
+            )
         return pdftotext.returncode
+
     # Handles in the input is a directory
     elif p.is_dir():
         logger.debug('Converting a directory')

@@ -1,7 +1,10 @@
 import os, pathlib, sys
+from re import M
 from pathlib import Path, PurePath
 import logging
 import logging.handlers
+from tkinter.constants import ANCHOR
+from typing import Text
 from dotenv import load_dotenv
 from pdf_utils import scan_tree, execute_pdftotext
 from dataclasses import dataclass
@@ -9,10 +12,12 @@ import tkinter.filedialog
 import tkinter as tk
 import tkinter.ttk as ttk
 import app_tk_widgets
-from regex_tester import RegexTester
 from io import StringIO
+import re
+import json
 logger = logging.getLogger(__name__)
-
+# ! TODO Dark Mode
+# ! TODO Output Dir CSV Transaction Log
 @dataclass
 class Pdf():
     """Class for Keeping track of all Pdf's being renamed"""
@@ -22,12 +27,18 @@ class Pdf():
     output_path: Path
     converted: bool
     id: str
-    text_data: StringIO
+    text_data: str
+    renamer_id: str
+    regex_matches: re.Match
+    regex_match_group: int
+    new_name: str
+    rename_op: tuple
 
     def __init__(self,id,name,input_path):
         self.id=id
         self.name=name
         self.input_path=input_path
+        self.converted=False
 
     def __repr__(self):
         return self.name
@@ -47,24 +58,111 @@ class AppMenu(tk.Menu):
         self.add_cascade(menu=self.m_utils,label='Utilities')
 
         self.master.configure(menu=self)
+    
     def open_regex_tester(master):
         x=tk.Toplevel(master)
         x.title('Regex Tester')
-        regex_tester = RegexTester(x)
+        regex_tester = app_tk_widgets.components.RegexTester(x)
 
-
-
-class PdfRenamer(ttk.Frame):
+class RegexMatcher(ttk.Frame):
 
     def __init__(self,master):
+
         ttk.Frame.__init__(self,master)
         self.grid(row=0,column=0,sticky='nsew',padx=5,pady=5)
         self.grid_rowconfigure(1,weight=1)
         self.grid_columnconfigure(0,weight=1)
+        
+        self.regex_entry = app_tk_widgets.components.RegexEntry(self)
+        self.regex_entry.grid(row=0,column=0)
+        
+        self.treeview = app_tk_widgets.components.TreeView(self,'Match View',('Name','Match','New Name'))
+        self.treeview.grid(row=1,column=0)
+        self.dataset=self.master.pdf_to_text.dataset
+        self.treeview.load_button.configure(command=self.load_dataset,state='normal')
+        self.treeview.convert_button.configure(command=self.convert_pdfs,state='normal',text='rename')
 
-        regex_entry = app_tk_widgets.components.RegexEntry(self)
+        self.treeview.convert_button.configure(command=self.convert_pdfs,state='normal',text='Rename')
 
+        
+        self.treeview.right_click_selection_menu.add_command(label='Regex Utility',command=lambda :self.open_regex_util())
 
+    def load_dataset(self):
+        # Grab the Data that has all pdf path info
+        dataset=self.master.pdf_to_text.dataset
+        self.dataset=dataset
+        if dataset:
+            # Clear out the treeview
+            self.treeview.tree.delete(*self.treeview.tree.get_children())
+            # Iterate over the data set
+            re_compiled = self.regex_entry.compiled
+            re_compiled_status = self.regex_entry.statusdisplay.cget('text')
+            re_compiled_group=self.regex_entry.group_var.get()
+            for pdf in dataset:
+                if pdf.converted:
+                    # List to hold tree view values
+                    tv_values=[pdf.name,'','']
+                    # Check if the regex entry is valid and complieds
+                    if  re_compiled_status == "" and re_compiled:
+                        m=re_compiled.search(pdf.text_data)
+                        if m is None:
+                            pass
+                        else:
+                            # Update the dataset
+                            pdf.regex_matches=m
+                            pdf.regex_match_group=re_compiled_group
+                            tv_values[1]=m.group(re_compiled_group).strip()
+                            #Construct the new file name
+                            name_suffix=PurePath(pdf.input_path).suffix
+                            new_name = f"{pdf.name.replace(name_suffix,'')} {tv_values[1].strip()}{name_suffix}"
+                            
+                            tv_values[2]=new_name
+                            pdf.new_name=new_name
+                    tv = self.treeview.tree.insert('','end',values=tv_values)
+                    pdf.renamer_id=tv
+
+    def convert_pdfs(self):
+        # Grab the Data that has all pdf path info
+        dataset=self.master.pdf_to_text.dataset
+        self.dataset=dataset
+        if dataset:
+            # Iterate over the data set
+            for pdf in dataset:
+                input_path=Path(pdf.input_path)
+                rename_path=input_path.parent / pdf.new_name
+                output={
+                    'operation': 'rename',
+                    'input_path': f'{input_path.resolve()}',
+                    'rename_path': f'{rename_path.resolve()}',
+                    'completed': True
+                }
+                try:
+                    pdf.rename_op=(input_path,rename_path)
+                    input_path.rename(rename_path)
+                except:
+                    output['completed']=False
+                    logging.exception(json.dumps(output))
+                    raise
+                else:
+                    logging.info(json.dumps(output))
+    
+    def open_regex_util(self):
+        x=tk.Toplevel(self.master)
+        x.title('Regex Tester')
+        selection = self.treeview.tree.selection()
+        dataset=self.master.pdf_to_text.dataset
+        text_data=''
+        for pdf in dataset:
+            if pdf.id == selection[0]:
+                text_data=pdf.text_data
+
+        self.regex_tester = app_tk_widgets.components.RegexTester(x)
+        self.regex_tester.regexdisplay.delete(0,tk.END)
+        self.regex_tester.regexdisplay.insert(0,self.regex_entry.var.get())
+        self.regex_tester.stringdisplay.delete(1.0,tk.END)
+        self.regex_tester.stringdisplay.insert(1.0,text_data)
+
+        self.regex_tester.recompile()
 
 class ConvertPdfToText(ttk.Frame):
 
@@ -84,13 +182,18 @@ class ConvertPdfToText(ttk.Frame):
         self.output.error_msg.trace_add(('write'),self.callback_treeview_convert_button)
         self.output.grid(row=1,column=0)
         # Tree view to display the loaded PDF's
-        self.treeview = app_tk_widgets.components.TreeView(self,'PDF View',('Name','Path','Relative'))
+        self.treeview = app_tk_widgets.components.TreeView(self,'PDF View',('Name','Input Path','Output Path',))
         self.treeview.grid(row=2,column=0)
+        # Configure the buttons in the treeview class
+        self.treeview.load_button.configure(command=self.load_pdfs)
+        self.treeview.convert_button.configure(command=self.convert_paths)
         # Holds information about converted PDF's
         self.dataset=[]
-        #TODO REmove these after testing
+        #TODO Remove these after testing
         self.input.dir.set("C:\Projects\PDFs\Animals")
+        self.input.assert_dir()
         self.output.dir.set("C:\Projects\Output")
+        self.output.assert_dir()
     
     def callback_treeview_convert_button(self,var,indx,mode):
         """ Controls the state of the Output button in the treeview based on if the input path is valid """
@@ -110,38 +213,63 @@ class ConvertPdfToText(ttk.Frame):
     
     def convert_paths(self):
         """Convert PDF's to text"""
-        op=PurePath(self.output.dir.get())
         for pdf in self.dataset:
-            final_output_path=op.joinpath(pdf.relative_output_path)
             x=execute_pdftotext(
                 exe=Path('pdftotext.exe'),
                 p=Path(pdf.input_path),
-                o=Path(final_output_path)
+                o=Path(pdf.output_path)
             )
             if x == 0:
-                pdf.converted=True
+                try:
+                    # read the text document and add it to the data set
+                    with pdf.output_path.open('r') as p:
+                        txt=p.read()
+                        pdf.text_data=txt   
+                except:
+                    raise
+                else:
+                    pdf.converted=True
             else:
+                logging.debug(f'Failed to convert: {pdf.input_path.resolve()}')
                 pdf.converted=False
 
     def load_pdfs(self):
         """ Load pdf path information from the specified directory """        
-
+        # Clear contents of the tree view
         self.treeview.tree.delete(*self.treeview.tree.get_children())
+        # Empty the data set
         self.dataset=[]
+        # Get the input directory as a path
         p=Path(self.input.dir.get())
+        # Get the input directory as a Pure Path
+        # Doing this to make use of the relative_to method
         pp=PurePath(self.input.dir.get())
-        self.dataset=[]
+        # Output Path
+        op=PurePath(self.output.dir.get())
         for scan in scan_tree(p):
-            spp=PurePath(scan)
-            spp_rel=spp.relative_to(self.input.dir.get())
-            if spp.suffix == '.pdf' :
-                x = self.treeview.tree.insert('','end',values=(scan.name,scan.path,spp_rel))
+            # scan pure path Directory Object
+            scan_pure_path=PurePath(scan)
+            # Directory object relative to the input directoy
+            scan_pure_path_rel=scan_pure_path.relative_to(self.input.dir.get())
+            # Output Path + relative scan path
+            final_output_path=op.joinpath(scan_pure_path_rel)
+            # Final output path plus the file name
+            final_path = final_output_path.parent.joinpath(final_output_path.name.replace('.pdf','.txt'))
+            # Check if its a Pdf
+            if scan_pure_path.suffix == '.pdf' :
+                # Tree view values
+                tv_values = [scan.name,scan.path,final_path]
+                # Insert the tree view item
+                tv_id = self.treeview.tree.insert('','end',values=tv_values)
+                # Initial Pdf Data class object
                 i = Pdf(
-                    x,
+                    tv_id,
                     scan.name,
                     scan.path
                 )
-                i.relative_output_path=spp_rel
+                # Add additional info to the object
+                i.output_path=Path(final_path)
+                i.relative_output_path=scan_pure_path_rel
                 self.dataset.append(i)
 
 class App(ttk.Notebook):
@@ -150,11 +278,11 @@ class App(ttk.Notebook):
         ttk.Notebook.__init__(self, master)
         self.grid(sticky='nsew',padx=5,pady=5,ipady=5,ipadx=5)
 
-        pdf_to_text=ConvertPdfToText(self)
-        pdf_Renamer = PdfRenamer(self)
-        self.add(pdf_to_text,text='Pdf to Txt')
-        self.add(pdf_Renamer,text='Pdf Renamer')
-        
+        self.pdf_to_text=ConvertPdfToText(self)
+        self.pdf_Renamer = RegexMatcher(self)
+
+        self.add(self.pdf_to_text,text='Pdf to Txt')
+        self.add(self.pdf_Renamer,text='Regex Match')
 
 def main():
     target=Path(os.getenv("TARGET",None))

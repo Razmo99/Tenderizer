@@ -113,3 +113,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 Tenderizer/pdftotext.exe
+Tenderizer/play.py

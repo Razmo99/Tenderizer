@@ -88,13 +88,15 @@ class TreeView(ttk.LabelFrame):
         dataset = self.master.dataset
         # current selection in the tree view
         selection = self.tree.selection()
-        # iterate over the current selection
-        for iid in selection:
-            # iterate over the data set
-            for index,pdf in enumerate(dataset):
-                # look for an ID match
-                if iid == pdf.id:
-                    # remove the item from the dataset
-                    del dataset[index]
+        # Check the tree view has a data set
+        if dataset:
+            # iterate over the current selection
+            for iid in selection:
+                # iterate over the data set
+                for index,pdf in enumerate(dataset):
+                    # look for an ID match
+                    if iid == pdf.id:
+                        # remove the item from the dataset
+                        del dataset[index]
         # Remove the selection from the tree view
         self.tree.delete(*self.tree.selection())

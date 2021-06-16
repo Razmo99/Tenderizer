@@ -34,9 +34,9 @@ class BrowseDir(ttk.LabelFrame):
         """ Allows the user to select a directory """
         path = Path(self.dir.get())
         if path.exists() and path.is_dir():
-            filename=ttk.filedialog.askdirectory(initialdir=path,title='Select a path')
+            filename=tk.filedialog.askdirectory(initialdir=path,title='Select a path')
         else:
-            filename=ttk.filedialog.askdirectory(initialdir='.',title='Select a path')
+            filename=tk.filedialog.askdirectory(initialdir='.',title='Select a path')
         if filename != path and filename != '':
             self.dir.set(filename)
     

@@ -189,7 +189,8 @@ class ConvertPdfToText(ttk.Frame):
         self.treeview.convert_button.configure(command=self.convert_paths)
         # Holds information about converted PDF's
         self.dataset=self.master.dataset
-        #TODO Remove these after testing
+        
+        #TODO ! Remove these after testing
         self.input.dir.set("C:\Projects\PDFs\Animals")
         self.input.assert_dir()
         self.output.dir.set("C:\Projects\Output")
@@ -288,9 +289,9 @@ class App(ttk.Notebook):
         self.add(self.pdf_Renamer,text='Regex Match')
 
 def main():
-    target=Path(os.getenv("TARGET",None))
-    destination=Path(os.getenv("DESTINATION",None))
-    pdftotext_exe=Path(os.getenv("PDFTOTEXT",None))
+    #target=Path(os.getenv("TARGET",None))
+    #destination=Path(os.getenv("DESTINATION",None))
+    #pdftotext_exe=Path(os.getenv("PDFTOTEXT",None))
     root = tk.Tk()
     app = App(root)
     menu = AppMenu(root)
@@ -311,7 +312,7 @@ if __name__ == "__main__":
         #Change the current working directory to be the parent of the main.py
         working_dir=pathlib.Path(__file__).resolve().parent
         os.chdir(working_dir)
-    if os.getenv('DEBUG').lower() == "true":
+    if os.getenv('DEBUG','').lower() == "true":
         LoggingLevel=logging.DEBUG
     else:
         LoggingLevel=logging.INFO

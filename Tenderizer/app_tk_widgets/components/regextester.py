@@ -5,6 +5,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import re
+from typing import Text
 
 class RegexTester:
 
@@ -24,17 +25,15 @@ class RegexTester:
         self.statusdisplay = ttk.Label(self.master, text="", anchor=tk.W)
         self.statusdisplay.pack(side=tk.TOP, fill=tk.X)
 
-        self.labeldisplay = ttk.Label(self.master, anchor=tk.W,
-                text="Enter a string to search:")
-        self.labeldisplay.pack(fill=tk.X)
-        self.labeldisplay.pack(fill=tk.X)
+        # Holds the Text display and its scroll bar
+        self.textdisplay_frame=ttk.LabelFrame(self.master,text='Enter a string to search')
+        self.textdisplay_frame.pack(fill=tk.BOTH,expand=1)
 
-        self.showframe = ttk.Frame(master)
+        self.showframe = ttk.Frame(self.textdisplay_frame)
         self.showframe.pack(fill=tk.X, anchor=tk.W)
 
         self.showvar = tk.StringVar(master)
         self.showvar.set("first")
-
         self.showfirstradio = ttk.Radiobutton(self.showframe,
                                          text="Highlight first match",
                                           variable=self.showvar,
@@ -48,16 +47,24 @@ class RegexTester:
                                         value="all",
                                         command=self.recompile)
         self.showallradio.pack(side=tk.LEFT)
-
-        self.stringdisplay = tk.Text(self.master, width=60, height=4)
-        self.stringdisplay.pack(fill=tk.BOTH, expand=1)
+        # Text Display to enter in match data
+        self.stringdisplay = tk.Text(self.textdisplay_frame, width=60, height=4)
+        self.stringdisplay.pack(fill=tk.BOTH, expand=1,side=tk.LEFT)
         self.stringdisplay.tag_configure("hit", background="yellow")
-
-        self.grouplabel = ttk.Label(self.master, text="Groups:", anchor=tk.W)
-        self.grouplabel.pack(fill=tk.X)
-
-        self.grouplist = tk.Listbox(self.master)
-        self.grouplist.pack(expand=1, fill=tk.BOTH)
+        # Scroll bar for the text display
+        self.text_scrollbar = ttk.Scrollbar(self.textdisplay_frame, orient=tk.VERTICAL, command=self.stringdisplay.yview)
+        self.text_scrollbar.pack(fill=tk.BOTH, side=tk.LEFT)
+        self.stringdisplay.configure(yscroll=self.text_scrollbar.set)
+        # Holds the regex match groups and its scroll bar
+        self.grouplist_frame=ttk.LabelFrame(self.master,text='Groups:')
+        self.grouplist_frame.pack(fill=tk.BOTH,expand=1)
+        # Holds all re match groups
+        self.grouplist = tk.Listbox(self.grouplist_frame)
+        self.grouplist.pack(expand=1, fill=tk.BOTH,side=tk.LEFT)
+        
+        self.grouplist_scrollbar = ttk.Scrollbar(self.grouplist_frame, orient=tk.VERTICAL, command=self.grouplist.yview)
+        self.grouplist_scrollbar.pack(fill=tk.BOTH, side=tk.LEFT)
+        self.grouplist.configure(yscroll=self.grouplist_scrollbar.set)        
 
         self.regexdisplay.bind('<Key>', self.recompile)
         self.stringdisplay.bind('<Key>', self.reevaluate)

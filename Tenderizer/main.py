@@ -18,6 +18,7 @@ import json
 logger = logging.getLogger(__name__)
 # ! TODO Dark Mode
 # ! TODO Output Dir CSV Transaction Log
+
 @dataclass
 class Pdf():
     """Class for Keeping track of all Pdf's being renamed"""
@@ -113,7 +114,7 @@ class RegexMatcher(ttk.Frame):
                             pdf.regex_matches=m
                             pdf.regex_match_group=re_compiled_group
                             tv_values[1]=m.group(re_compiled_group).strip()
-                            #Construct the new file name
+                            # Construct the new file name
                             name_suffix=PurePath(pdf.input_path).suffix
                             new_name = f"{pdf.name.replace(name_suffix,'')} {tv_values[1].strip()}{name_suffix}"
                             

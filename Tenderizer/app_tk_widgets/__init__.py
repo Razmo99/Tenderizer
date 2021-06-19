@@ -1,1 +1,1 @@
-from .components import BrowseDir, TreeView, RegexEntry, RegexTester
+from .components import BrowseDir, TreeView, RegexEntry, RegexTester, RegexMatchOrder

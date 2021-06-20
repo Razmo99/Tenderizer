@@ -1,6 +1,9 @@
-from os import stat
+import logging
 import tkinter as tk
 import tkinter.ttk as ttk
+import re
+import logging
+logger = logging.getLogger(__name__)
 
 class RegexMatchOrder(ttk.Labelframe):
     """Class that facilitates the ordering or regex matches"""
@@ -17,7 +20,8 @@ class RegexMatchOrder(ttk.Labelframe):
         self.deliminator_options={
             'Hyphen':'-',
             'Space':' ',
-            'Underscore':'_'
+            'Underscore':'_',
+            'Period':'.'
         }
 
         self.new_tree_view_frame()
@@ -98,13 +102,18 @@ class RegexMatchOrder(ttk.Labelframe):
         self.tv_frame.grid_rowconfigure(0,weight=1)
         self.tv_frame.grid_columnconfigure(0,weight=1)
     
-    def add_tree_view_items(self,groups):
+    def add_tree_view_items(self,match):
         """ Adds items to the tree view  """
-        for key,value in groups.items():
-            tv_values=[key,value[:25]]
-            self.tree.insert('','end',iid=key,values=tv_values)
+        self.tree.delete(*self.tree.get_children())
+        for index,group in enumerate(match.groups(),start=1):
+            tv_values=[index,group[:25]]
+            self.tree.insert('','end',iid=index,values=tv_values)
+        self.compare_user_input
 
     def compare_user_input(self,event=None):
+        """ Compare user input against the tree view
+            Refeshes the selection preview
+         """
         # Clear the existing match_order and selection_preview
         del self.match_order[:]
         del self.selection_preview[:]
@@ -137,7 +146,7 @@ class RegexMatchOrder(ttk.Labelframe):
             # Check the selection exists in the tree view ids
             if selection in tv_ids:
                 #Add the selection to the match order which is used by a parent class
-                self.match_order.append(selection)
+                self.match_order.append(int(selection))
                 # Grab row values from the tree view
                 tv_values=self.tree.set(selection)
                 # append the tree view value above to the selection preview
@@ -146,9 +155,12 @@ class RegexMatchOrder(ttk.Labelframe):
                 if selection_deliminator:
                     self.selection_preview.append(selection_deliminator)
                 else:
-                    # Get the first deliminator in the available options
-                    first_key=next(iter(self.deliminator_options))
-                    self.selection_preview.append(self.deliminator_options.get(first_key))
+                    self.selection_preview.append(self.get_first_deliminator())
+
+    def get_first_deliminator(self):
+        """ Get the first deliminator in the available options """
+        first_key=next(iter(self.deliminator_options))
+        return self.deliminator_options.get(first_key)
 
     def remove_entry_tip(self,event=None):
         """Gets called once the entry field is clicked then unbinds itself"""
@@ -161,15 +173,43 @@ class RegexMatchOrder(ttk.Labelframe):
     def on_deliminator_selection(self,val):
         self.compare_user_input()
 
+    def new_file_name(self,prefix,suffix,matches):
+        """ Generates a file name based on selection order and deliminator """
+        # Set the deliminator
+        selection_deliminator=self.deliminator_options.get(self.deliminator_var.get())
+        selection_deliminator=selection_deliminator if not selection_deliminator == None else self.get_first_deliminator()
+        new_name=[]
+        result=''
+        # Iterate over the match order
+        for order in self.match_order:
+            # Grab the match from the match group
+            match=matches.group(order)
+            new_name.append(match)
+            new_name.append(selection_deliminator)
+        if new_name:
+            new_name.insert(0,selection_deliminator)
+            new_name.insert(0,prefix)
+            del new_name[-1]
+            new_name.append(suffix)
+            result=''.join(new_name)
+        if result:
+            print(result)
+            return result
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = RegexMatchOrder(root)
     root.protocol('WM_DELETE_WINDOW', root.quit)
     root.option_add('*tearOff', tk.FALSE)
-    root.grid_rowconfigure(0,weight=1)
-    root.grid_columnconfigure(0,weight=1)
-
-    groups = {1:'Cheese',2:'Baked',3:'Cake'}
-    app.add_tree_view_items(groups)
-
+    root.columnconfigure(0,weight=1)
+    root.rowconfigure(1,weight=1)
+    s=ttk.Style()
+    
+    s.configure('TFrame',background='grey')
+    match=re.match(r"(\w*) (\w*) (\w*)",'Cakes Baked Cheese')
+    
+    y=ttk.Button(root,text='press me',command=lambda: app.new_file_name('CookBook','.pdf',match))
+    y.grid()
+    app.add_tree_view_items(match)
+    app.grid(row=0,column=0)
     root.mainloop()    

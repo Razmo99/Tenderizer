@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter.constants import CENTER
 import tkinter.ttk as ttk
 import re
-
+from .regexmatchorder import RegexMatchOrder
 class RegexEntry(ttk.Labelframe):
     """Class that holds a entry box for regular expression with flags"""
     # This is a chopped up copy of regex tester demo on python.org
@@ -15,40 +15,55 @@ class RegexEntry(ttk.Labelframe):
         # Init the parent frame for this call that all widgets will sit in
         ttk.LabelFrame.__init__(self,master,text='Regular Expression')
         self.grid(sticky='nsew',padx=5,pady=5)
-        self.grid_rowconfigure(1,weight=1)
         self.grid_columnconfigure(0,weight=1)
+        self.grid_rowconfigure(6,weight=1)
 
         self.compiled=None
-        # Displays any re compile errors 
-        self.statusdisplay = ttk.Label(self, text='')
-        self.statusdisplay.grid(sticky='nwe',pady=5,padx=5,row=0,column=0,ipadx=5,ipady=5)
-        self.bg=self.statusdisplay['background']
-
-        # Hold the re string
-        self.var=tk.StringVar(self)
-        # Entry widget to type the re into
-        self.entry=ttk.Entry(self,textvariable=self.var)
-        self.entry.grid(sticky='nwe',pady=5,padx=5,row=1,column=0)
+        self.new_status_display_label()
+        self.new_re_entry()
 
         # This adds all the check boxes for re flags
         self.addoptions()
         
-        # Frame to hold re group spinbox
+        self.new_match_group_frame()
+        self.new_match_group_label()
+        self.new_match_group_spin_box()
+        self.match_group_selector=RegexMatchOrder(self)
+        self.match_group_selector.grid(sticky='nsew',row=6,column=0)
+        #self.match_group_selector.grid
+        self.recompile()
+
+    def new_status_display_label(self):
+        """ Displays any re compile errors """
+        self.statusdisplay = ttk.Label(self, text='')
+        self.statusdisplay.grid(sticky='nwe',pady=5,padx=5,row=0,column=0,ipadx=5,ipady=5)
+        self.bg=self.statusdisplay['background']
+
+    def new_re_entry(self):
+        """ Entry the re string """
+        self.var=tk.StringVar(self)
+        # Entry widget to type the re into
+        self.entry=ttk.Entry(self,textvariable=self.var)
+        self.entry.grid(sticky='nwe',pady=5,padx=5,row=1,column=0)
+        # Recomplile the regular expression every time a key is pressed in the entry widget
+        self.entry.bind('<KeyRelease>', self.recompile)        
+
+    def new_match_group_frame(self):
+        """ Frame to hold re group spinbox """
         self.group_frame = ttk.Frame(self)
         self.group_frame.grid(sticky='nw',row=5,column=0)
         self.group_frame.grid_rowconfigure(1,weight=1)
         self.group_frame.grid_columnconfigure(0,weight=1)
 
-        self.group_label = ttk.Label(self.group_frame,text='RE Match Group:')
-        self.group_label.grid(row=0,column=0,sticky="nw",padx=5,pady=5)
+    def new_match_group_spin_box(self):
         # Spinbox that lets the user select the regex match group
         self.group_var=tk.IntVar()
         self.group=ttk.Spinbox(self.group_frame,from_=0,to=0,textvariable=self.group_var,state='readonly')
         self.group.grid(row=0,column=1,sticky="nw",padx=5,pady=5)
 
-        # Recomplile the regular expression every time a key is pressed in the entry widget
-        self.entry.bind('<Key>', self.recompile)
-        self.recompile()
+    def new_match_group_label(self):
+        self.group_label = ttk.Label(self.group_frame,text='RE Match Group:')
+        self.group_label.grid(row=0,column=0,sticky="nw",padx=5,pady=5)
     
     def addoptions(self):
         """Adds re Flags under regex entry"""
@@ -94,3 +109,14 @@ class RegexEntry(ttk.Labelframe):
                     text=f"re.error: {str(msg)}",
                     background="red")
             self.group.configure(to=0)
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = RegexEntry(root)
+    root.protocol('WM_DELETE_WINDOW', root.quit)
+    root.option_add('*tearOff', tk.FALSE)
+    root.grid_rowconfigure(0,weight=1)
+    root.grid_columnconfigure(0,weight=1)
+
+    root.mainloop()   

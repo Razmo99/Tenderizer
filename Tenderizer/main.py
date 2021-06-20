@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 class Pdf():
     """Class for Keeping track of all Pdf's being renamed"""
     name: str
-    input_path: Path
-    relative_output_path: Path
-    output_path: Path
+    input_path: PurePath
+    relative_output_path: PurePath
+    output_path: PurePath
     converted: bool
     id: str
     text_data: str
@@ -72,14 +72,20 @@ class RegexMatcher(ttk.Frame):
         ttk.Frame.__init__(self,master)
         self.dataset=self.master.dataset
 
-        self.grid(row=0,column=0,sticky='nsew',padx=5,pady=5)
+        self.grid(row=0,column=0,sticky='nsew')
+        self.grid_rowconfigure(0,weight=3)
         self.grid_rowconfigure(1,weight=1)
         self.grid_columnconfigure(0,weight=1)
         
         self.regex_entry = app_tk_widgets.components.RegexEntry(self)
         self.regex_entry.grid(row=0,column=0)
-        
-        self.treeview = app_tk_widgets.components.TreeView(self,'Match View',('Name','Match','New Name'))
+
+        # Method to generate a new pdf file name based on the selections in the RegexMatchOrder on screen
+        self.new_match_ordered_name=self.regex_entry.match_group_selector.new_file_name
+        # Method to update the tree view in the RegexMatchOrder on screen
+        self.new_match_order_examples=self.regex_entry.match_group_selector.add_tree_view_items
+
+        self.treeview = app_tk_widgets.components.TreeView(self,'Match View',('Name','New Name'))
         self.treeview.grid(row=1,column=0)
         
         self.treeview.load_button.configure(command=self.load_dataset,state='normal')
@@ -87,41 +93,41 @@ class RegexMatcher(ttk.Frame):
 
         self.treeview.convert_button.configure(command=self.convert_pdfs,state='normal',text='Rename')
 
-        
         self.treeview.right_click_selection_menu.add_command(label='Regex Utility',command=lambda :self.open_regex_util())
 
     def load_dataset(self):
-        # Grab the Data that has all pdf path info
         dataset=self.dataset
         if dataset:
             # Clear out the treeview
             self.treeview.tree.delete(*self.treeview.tree.get_children())
-            # Iterate over the data set
-            re_compiled = self.regex_entry.compiled
-            re_compiled_status = self.regex_entry.statusdisplay.cget('text')
-            re_compiled_group=self.regex_entry.group_var.get()
             for pdf in dataset:
-                if pdf.converted:
-                    # List to hold tree view values
-                    tv_values=[pdf.name,'','']
-                    # Check if the regex entry is valid and complieds
-                    if  re_compiled_status == "" and re_compiled:
-                        m=re_compiled.search(pdf.text_data)
-                        if m is None:
-                            pass
-                        else:
-                            # Update the dataset
-                            pdf.regex_matches=m
-                            pdf.regex_match_group=re_compiled_group
-                            tv_values[1]=m.group(re_compiled_group).strip()
-                            # Construct the new file name
-                            name_suffix=PurePath(pdf.input_path).suffix
-                            new_name = f"{pdf.name.replace(name_suffix,'')} {tv_values[1].strip()}{name_suffix}"
-                            
-                            tv_values[2]=new_name
-                            pdf.new_name=new_name
-                    tv = self.treeview.tree.insert('','end',values=tv_values)
-                    pdf.renamer_id=tv
+                new_name=self.search_re_expression(pdf)
+                self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,new_name])
+            if dataset[1].converted and dataset[1].regex_matches:
+                self.new_match_order_examples(dataset[1].regex_matches)
+    
+    def confirm_re_compiled(self):
+        """ Checks that the re is compiled and no syntax warnings are present"""
+        re_compiled = self.regex_entry.compiled
+        re_compiled_status = self.regex_entry.statusdisplay.cget('text')
+        if  re_compiled_status == "" and re_compiled:
+            return re_compiled
+    
+    def search_re_expression(self, pdf):
+        if pdf.converted:
+            # Check if the regex entry is valid and compiled
+            compiled_re=self.confirm_re_compiled()
+            if  compiled_re:
+                re_matches=compiled_re.search(pdf.text_data)
+                if not re_matches is None:
+                    # Update the dataset
+                    pdf.regex_matches=re_matches
+                    # Construct the new file name
+                    suffix=pdf.input_path.suffix
+                    prefix=pdf.input_path.with_suffix('')
+                    new_name = self.new_match_ordered_name(suffix,prefix,re_matches)
+                    if new_name:
+                        pdf.new_name=new_name
 
     def convert_pdfs(self):
         # Grab the Data that has all pdf path info
@@ -151,9 +157,8 @@ class RegexMatcher(ttk.Frame):
         x=tk.Toplevel(self.master)
         x.title('Regex Tester')
         selection = self.treeview.tree.selection()
-        dataset=self.master.pdf_to_text.dataset
         text_data=''
-        for pdf in dataset:
+        for pdf in self.dataset:
             if pdf.id == selection[0]:
                 text_data=pdf.text_data
 
@@ -216,15 +221,16 @@ class ConvertPdfToText(ttk.Frame):
     def convert_paths(self):
         """Convert PDF's to text"""
         for pdf in self.dataset:
+            output_path=Path(pdf.output_path)
             x=execute_pdftotext(
                 exe=Path('xpdf/pdftotext.exe'),
                 p=Path(pdf.input_path),
-                o=Path(pdf.output_path)
+                o=output_path
             )
             if x == 0:
                 try:
                     # read the text document and add it to the data set
-                    with pdf.output_path.open('r') as p:
+                    with output_path.open('r') as p:
                         txt=p.read()
                         pdf.text_data=txt   
                 except:
@@ -267,11 +273,11 @@ class ConvertPdfToText(ttk.Frame):
                 i = Pdf(
                     tv_id,
                     scan.name,
-                    scan.path
+                    PurePath(scan.path)
                 )
                 # Add additional info to the object
-                i.output_path=Path(final_path)
-                i.relative_output_path=scan_pure_path_rel
+                i.output_path=PurePath(final_path)
+                i.relative_output_path=PurePath(scan_pure_path_rel)
                 self.dataset.append(i)
 
 class App(ttk.Notebook):

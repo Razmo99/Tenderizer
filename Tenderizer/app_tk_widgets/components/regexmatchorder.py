@@ -128,7 +128,7 @@ class RegexMatchOrder(ttk.Labelframe):
             # remove tail deliminator
             del self.selection_preview[-1]
             # Set the preview label to display the results
-            self.selection_preview_label.configure(text=''.join(self.selection_preview))
+            self.selection_preview_label.configure(text=''.join(self.set_match_deliminator(self.selection_preview)))
         else:
             # No matches found let display on the gui
             self.selection_preview_label.configure(text='No Matches')
@@ -152,15 +152,17 @@ class RegexMatchOrder(ttk.Labelframe):
                 # append the tree view value above to the selection preview
                 self.selection_preview.append(tv_values['Example Value'])
                 # append the deliminator
-                if selection_deliminator:
-                    self.selection_preview.append(selection_deliminator)
-                else:
-                    self.selection_preview.append(self.get_first_deliminator())
+                self.selection_preview.append(self.get_deliminator())
 
-    def get_first_deliminator(self):
-        """ Get the first deliminator in the available options """
-        first_key=next(iter(self.deliminator_options))
-        return self.deliminator_options.get(first_key)
+    def get_deliminator(self):
+        """ return the selected deliminator or 
+        returns the first deliminator in the available options if no option is choosen yet """
+        current_selection=self.deliminator_options.get(self.deliminator_var.get())
+        if current_selection:
+            return current_selection
+        else:
+            first_key=next(iter(self.deliminator_options))
+            return self.deliminator_options.get(first_key)
 
     def remove_entry_tip(self,event=None):
         """Gets called once the entry field is clicked then unbinds itself"""
@@ -168,7 +170,7 @@ class RegexMatchOrder(ttk.Labelframe):
             self.entry.delete(0,'end')
             self.entry.insert(0,'')
             self.entry.configure(foreground='black')
-            self.entry.unbind(self.remove_entry_tip)
+            self.entry.unbind('<FocusIn>')
 
     def on_deliminator_selection(self,val):
         self.compare_user_input()
@@ -176,25 +178,50 @@ class RegexMatchOrder(ttk.Labelframe):
     def new_file_name(self,prefix,suffix,matches):
         """ Generates a file name based on selection order and deliminator """
         # Set the deliminator
-        selection_deliminator=self.deliminator_options.get(self.deliminator_var.get())
-        selection_deliminator=selection_deliminator if not selection_deliminator == None else self.get_first_deliminator()
-        new_name=[]
+        selection_deliminator=self.get_deliminator()
+        file_name=[]
         result=''
         # Iterate over the match order
         for order in self.match_order:
             # Grab the match from the match group
             match=matches.group(order)
-            new_name.append(match)
-            new_name.append(selection_deliminator)
-        if new_name:
-            new_name.insert(0,selection_deliminator)
-            new_name.insert(0,prefix)
-            del new_name[-1]
-            new_name.append(suffix)
-            result=''.join(new_name)
+            file_name.append(match)
+            file_name.append(selection_deliminator)
+        
+        if file_name:
+            # Insert the prefix with a deliminator
+            file_name.insert(0,selection_deliminator)
+            file_name.insert(0,prefix)
+            # remove the tail deliminator
+            del file_name[-1]
+            # Adjust all deliminators to match gui selection
+            adjusted_deliminators=self.set_match_deliminator(file_name)
+            # Insert the suffix
+            adjusted_deliminators.append(suffix)
+            # Create the final string
+            result=''.join(adjusted_deliminators)
         if result:
-            print(result)
             return result
+
+    def set_match_deliminator(self,string_array):
+        """ Takes in an array of strings,
+            changes the deliminator to whats selected in the gui.
+            Only processes deliminator options defined in the init of the class
+        """
+        #Make a copy of the input array
+        results=string_array.copy()
+        selected_deliminator=self.get_deliminator()
+        # Iterate over the regocnised deliminators
+        for key,value in self.deliminator_options.items():
+            # Iterate over the string_array
+            for index,string in enumerate(results):
+                # Check if the deliminator exists in the string
+                if value in string:
+                    s=results[index]
+                    if len(string) > 1:
+                        s=s.strip()
+                    results[index]=s.replace(value,selected_deliminator)
+        return results
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -206,9 +233,9 @@ if __name__ == "__main__":
     s=ttk.Style()
     
     s.configure('TFrame',background='grey')
-    match=re.match(r"(\w*) (\w*) (\w*)",'Cakes Baked Cheese')
+    match=re.match(r"Drawing Title (.*)Sca",'Drawing Title The Lazy Cat Scale to A0')
     
-    y=ttk.Button(root,text='press me',command=lambda: app.new_file_name('CookBook','.pdf',match))
+    y=ttk.Button(root,text='new_file_name',command=lambda: print(app.new_file_name('CookBook','.pdf',match)))
     y.grid()
     app.add_tree_view_items(match)
     app.grid(row=0,column=0)

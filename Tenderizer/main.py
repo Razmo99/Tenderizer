@@ -73,7 +73,7 @@ class RegexMatcher(ttk.Frame):
         self.dataset=self.master.dataset
 
         self.grid(row=0,column=0,sticky='nsew')
-        self.grid_rowconfigure(0,weight=3)
+        self.grid_rowconfigure(0,weight=5)
         self.grid_rowconfigure(1,weight=1)
         self.grid_columnconfigure(0,weight=1)
         
@@ -88,7 +88,7 @@ class RegexMatcher(ttk.Frame):
         self.treeview.grid(row=1,column=0)
         
         self.treeview.load_button.configure(command=self.set_files_new_name,state='normal')
-        self.treeview.convert_button.configure(command=self.rename_files,state='normal',text='rename')
+        self.treeview.convert_button.configure(command=self.rename_files,state='normal',text='Rename')
 
         self.treeview.right_click_selection_menu.add_command(label='Regex Utility',command=lambda :self.open_regex_util())
 

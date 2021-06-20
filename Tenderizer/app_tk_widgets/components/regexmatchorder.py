@@ -230,8 +230,9 @@ if __name__ == "__main__":
     root.option_add('*tearOff', tk.FALSE)
     root.columnconfigure(0,weight=1)
     root.rowconfigure(1,weight=1)
-    s=ttk.Style()
     
+    # For Testing functionality of component
+    s=ttk.Style()
     s.configure('TFrame',background='grey')
     match=re.match(r"Drawing Title (.*)Sca",'Drawing Title The Lazy Cat Scale to A0')
     

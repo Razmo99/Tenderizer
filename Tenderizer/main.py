@@ -101,8 +101,8 @@ class RegexMatcher(ttk.Frame):
             # Clear out the treeview
             self.treeview.tree.delete(*self.treeview.tree.get_children())
             for pdf in dataset:
-                new_name=self.search_re_expression(pdf)
-                self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,new_name])
+                tv_new_name=self.search_re_expression(pdf)
+                self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,tv_new_name])
             if dataset[1].converted and dataset[1].regex_matches:
                 self.new_match_order_examples(dataset[1].regex_matches)
     
@@ -124,10 +124,11 @@ class RegexMatcher(ttk.Frame):
                     pdf.regex_matches=re_matches
                     # Construct the new file name
                     suffix=pdf.input_path.suffix
-                    prefix=pdf.input_path.with_suffix('')
-                    new_name = self.new_match_ordered_name(suffix,prefix,re_matches)
+                    prefix=pdf.name.replace(suffix,'')
+                    new_name = self.new_match_ordered_name(prefix,suffix,re_matches)
                     if new_name:
                         pdf.new_name=new_name
+                        return new_name
 
     def convert_pdfs(self):
         # Grab the Data that has all pdf path info

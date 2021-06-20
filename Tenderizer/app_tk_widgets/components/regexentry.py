@@ -25,9 +25,6 @@ class RegexEntry(ttk.Labelframe):
         # This adds all the check boxes for re flags
         self.addoptions()
         
-        self.new_match_group_frame()
-        self.new_match_group_label()
-        self.new_match_group_spin_box()
         self.match_group_selector=RegexMatchOrder(self)
         self.match_group_selector.grid(sticky='nsew',row=6,column=0)
         #self.match_group_selector.grid
@@ -47,23 +44,6 @@ class RegexEntry(ttk.Labelframe):
         self.entry.grid(sticky='nwe',pady=5,padx=5,row=1,column=0)
         # Recomplile the regular expression every time a key is pressed in the entry widget
         self.entry.bind('<KeyRelease>', self.recompile)        
-
-    def new_match_group_frame(self):
-        """ Frame to hold re group spinbox """
-        self.group_frame = ttk.Frame(self)
-        self.group_frame.grid(sticky='nw',row=5,column=0)
-        self.group_frame.grid_rowconfigure(1,weight=1)
-        self.group_frame.grid_columnconfigure(0,weight=1)
-
-    def new_match_group_spin_box(self):
-        # Spinbox that lets the user select the regex match group
-        self.group_var=tk.IntVar()
-        self.group=ttk.Spinbox(self.group_frame,from_=0,to=0,textvariable=self.group_var,state='readonly')
-        self.group.grid(row=0,column=1,sticky="nw",padx=5,pady=5)
-
-    def new_match_group_label(self):
-        self.group_label = ttk.Label(self.group_frame,text='RE Match Group:')
-        self.group_label.grid(row=0,column=0,sticky="nw",padx=5,pady=5)
     
     def addoptions(self):
         """Adds re Flags under regex entry"""
@@ -102,13 +82,11 @@ class RegexEntry(ttk.Labelframe):
             self.compiled = re.compile(self.entry.get(),
                                        self.getflags())
             self.statusdisplay.config(text="", background=self.bg)
-            self.group.configure(to=self.compiled.groups)
         except tk.re.error as msg:
             self.compiled = None
             self.statusdisplay.config(
                     text=f"re.error: {str(msg)}",
                     background="red")
-            self.group.configure(to=0)
 
 
 if __name__ == "__main__":

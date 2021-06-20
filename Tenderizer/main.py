@@ -84,25 +84,27 @@ class RegexMatcher(ttk.Frame):
         self.new_match_ordered_name=self.regex_entry.match_group_selector.new_file_name
         # Method to update the tree view in the RegexMatchOrder on screen
         self.new_match_order_examples=self.regex_entry.match_group_selector.add_tree_view_items
-
         self.treeview = app_tk_widgets.components.TreeView(self,'Match View',('Name','New Name'))
         self.treeview.grid(row=1,column=0)
         
-        self.treeview.load_button.configure(command=self.load_dataset,state='normal')
-        self.treeview.convert_button.configure(command=self.convert_pdfs,state='normal',text='rename')
-
-        self.treeview.convert_button.configure(command=self.convert_pdfs,state='normal',text='Rename')
+        self.treeview.load_button.configure(command=self.set_files_new_name,state='normal')
+        self.treeview.convert_button.configure(command=self.rename_files,state='normal',text='rename')
 
         self.treeview.right_click_selection_menu.add_command(label='Regex Utility',command=lambda :self.open_regex_util())
 
-    def load_dataset(self):
+    def set_files_new_name(self):
+        """ Evaluates the dataset against the input re expression """
         dataset=self.dataset
         if dataset:
             # Clear out the treeview
             self.treeview.tree.delete(*self.treeview.tree.get_children())
+            # Iterate over each pdf
             for pdf in dataset:
+                # Generate the new name based on the re expression
                 tv_new_name=self.search_re_expression(pdf)
+                # Updae the tree view to display the above value
                 self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,tv_new_name])
+            # Update the match orderexamples with pdf data
             if dataset[1].converted and dataset[1].regex_matches:
                 self.new_match_order_examples(dataset[1].regex_matches)
     
@@ -130,12 +132,10 @@ class RegexMatcher(ttk.Frame):
                         pdf.new_name=new_name
                         return new_name
 
-    def convert_pdfs(self):
-        # Grab the Data that has all pdf path info
-        dataset=self.dataset
-        if dataset:
+    def rename_files(self):
+        if self.dataset:
             # Iterate over the data set
-            for pdf in dataset:
+            for pdf in self.dataset:
                 input_path=Path(pdf.input_path)
                 rename_path=input_path.parent / pdf.new_name
                 output={

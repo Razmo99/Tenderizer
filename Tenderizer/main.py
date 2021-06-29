@@ -96,15 +96,12 @@ class RegexMatcher(ttk.Frame):
         """ Evaluates the dataset against the input re expression """
         dataset=self.dataset
         if dataset:
-            # Clear out the treeview
             self.treeview.tree.delete(*self.treeview.tree.get_children())
-            # Iterate over each pdf
             for pdf in dataset:
-                # Generate the new name based on the re expression
                 tv_new_name=self.search_re_expression(pdf)
-                # Updae the tree view to display the above value
+                if isinstance(tv_new_name,str):
+                    tv_new_name = tv_new_name[:512]
                 self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,tv_new_name])
-            # Update the match orderexamples with pdf data
             if dataset[1].converted and dataset[1].regex_matches:
                 self.new_match_order_examples(dataset[1].regex_matches)
     

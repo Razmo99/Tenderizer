@@ -106,7 +106,7 @@ class RegexMatchOrder(ttk.Labelframe):
         """ Adds items to the tree view  """
         self.tree.delete(*self.tree.get_children())
         for index,group in enumerate(match.groups(),start=1):
-            tv_values=[index,group[:25]]
+            tv_values=[index,group.strip()]
             self.tree.insert('','end',iid=index,values=tv_values)
         self.compare_user_input
 
@@ -123,14 +123,11 @@ class RegexMatchOrder(ttk.Labelframe):
 
     def update_selection_preview(self):
         """ Update the selection preview """
-        # make sure we got something
         if self.selection_preview:
             # remove tail deliminator
             del self.selection_preview[-1]
-            # Set the preview label to display the results
             self.selection_preview_label.configure(text=''.join(self.set_match_deliminator(self.selection_preview)))
         else:
-            # No matches found let display on the gui
             self.selection_preview_label.configure(text='No Matches')
 
     def update_selections(self):
@@ -177,28 +174,25 @@ class RegexMatchOrder(ttk.Labelframe):
 
     def new_file_name(self,prefix,suffix,matches):
         """ Generates a file name based on selection order and deliminator """
-        # Set the deliminator
         selection_deliminator=self.get_deliminator()
         file_name=[]
         result=''
-        # Iterate over the match order
         for order in self.match_order:
-            # Grab the match from the match group
-            match=matches.group(order)
-            file_name.append(match)
-            file_name.append(selection_deliminator)
+            try:
+                match=matches.group(order)
+            except IndexError:
+                logging.debug(f'Failed to find match order:{order}')
+            else:
+                file_name.append(match)
+                file_name.append(selection_deliminator)
         
         if file_name:
-            # Insert the prefix with a deliminator
             file_name.insert(0,selection_deliminator)
             file_name.insert(0,prefix)
             # remove the tail deliminator
             del file_name[-1]
-            # Adjust all deliminators to match gui selection
             adjusted_deliminators=self.set_match_deliminator(file_name)
-            # Insert the suffix
             adjusted_deliminators.append(suffix)
-            # Create the final string
             result=''.join(adjusted_deliminators)
         if result:
             return result
@@ -208,13 +202,13 @@ class RegexMatchOrder(ttk.Labelframe):
             changes the deliminator to whats selected in the gui.
             Only processes deliminator options defined in the init of the class
         """
-        #Make a copy of the input array
+        # Make a copy of the input array
         results=string_array.copy()
         selected_deliminator=self.get_deliminator()
-        # Iterate over the regocnised deliminators
-        for key,value in self.deliminator_options.items():
-            # Iterate over the string_array
-            for index,string in enumerate(results):
+        # Iterate over the string_array
+        for index,string in enumerate(results):
+            # Iterate over the regocnised deliminators
+            for key,value in self.deliminator_options.items():
                 # Check if the deliminator exists in the string
                 if value in string:
                     s=results[index]

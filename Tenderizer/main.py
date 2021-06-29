@@ -195,9 +195,9 @@ class ConvertPdfToText(ttk.Frame):
         self.dataset=self.master.dataset
         
         #TODO ! Remove these after testing
-        self.input.dir.set("C:\Projects\PDFs\Animals")
+        self.input.dir.set("C:/Projects/Elec_draw_char")
         self.input.assert_dir()
-        self.output.dir.set("C:\Projects\Output")
+        self.output.dir.set("C:/Projects/o_Elec_draw_char")
         self.output.assert_dir()
     
     def callback_treeview_convert_button(self,var,indx,mode):

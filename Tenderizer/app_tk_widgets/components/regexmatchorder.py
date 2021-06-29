@@ -23,6 +23,7 @@ class RegexMatchOrder(ttk.Labelframe):
             'Underscore':'_',
             'Period':'.'
         }
+        self.deliminator_regex=None
 
         self.new_tree_view_frame()
         self.new_tree_view()
@@ -37,6 +38,17 @@ class RegexMatchOrder(ttk.Labelframe):
         # Displays an example of what the selection will look like
         self.selection_preview_label = ttk.Label(self.details_frame, text='Nothing to display yet.',wraplength=300,justify=tk.LEFT)
         self.selection_preview_label.grid(sticky='nwe',pady=5,padx=5,row=3,column=0)
+
+    def new_deliminator_regex(self):
+        deliminators=[]
+        for key,value in self.deliminator_options.items():
+            deliminators.append(r"".join(value))
+            deliminators.append(r"|")
+        del deliminators[-1]
+        deliminators.append(r")\1*")
+        deliminators.insert(0,r"(")
+        complete_regex=r"".join(deliminators)
+        self.deliminator_regex=re.compile(complete_regex)
 
     def new_tree_view(self):
         """ Create treeview with columns and headers"""
@@ -57,7 +69,7 @@ class RegexMatchOrder(ttk.Labelframe):
     def new_selection_entry(self):
         """ Entry for the user to select re match groups"""
         # Descriptions for the match order selection entry
-        self.entry_label = ttk.Label(self.details_frame, text='Enter in any combination of ID(s)\n seperated by a comma, from the View to the left.',wraplength=300,justify=tk.LEFT)
+        self.entry_label = ttk.Label(self.details_frame, text='From the View to the left, enter in any combination of ID(s)\n seperated by a comma.',wraplength=300,justify=tk.LEFT)
         self.entry_label.grid(sticky='nwe',pady=5,padx=5,row=0,column=0)
         # Hold the re match selection string
         self.var=tk.StringVar(self)
@@ -132,23 +144,13 @@ class RegexMatchOrder(ttk.Labelframe):
 
     def update_selections(self):
         """ Makes sure that the selections entered are valid re Match Groups"""
-        # Get the current selections
         selections=self.entry.get().split(',')
-        # Get the treeview's ID's
         tv_ids=self.tree.get_children()
-        # Set the deliminator
-        selection_deliminator=self.deliminator_options.get(self.deliminator_var.get())
-        # Iterate over the split selections
         for selection in selections:
-            # Check the selection exists in the tree view ids
             if selection in tv_ids:
-                #Add the selection to the match order which is used by a parent class
                 self.match_order.append(int(selection))
-                # Grab row values from the tree view
                 tv_values=self.tree.set(selection)
-                # append the tree view value above to the selection preview
                 self.selection_preview.append(tv_values['Example Value'])
-                # append the deliminator
                 self.selection_preview.append(self.get_deliminator())
 
     def get_deliminator(self):
@@ -195,21 +197,20 @@ class RegexMatchOrder(ttk.Labelframe):
             adjusted_deliminators.append(suffix)
             result=''.join(adjusted_deliminators)
         if result:
-            return result
+            # remove any character that are not in the '[]'
+            clean_special_char=re.sub(r'[^\d\w\-_\. \(\)]+','_',result)
+            return clean_special_char
 
     def set_match_deliminator(self,string_array):
         """ Takes in an array of strings,
             changes the deliminator to whats selected in the gui.
             Only processes deliminator options defined in the init of the class
         """
-        # Make a copy of the input array
         results=string_array.copy()
         selected_deliminator=self.get_deliminator()
-        # Iterate over the string_array
         for index,string in enumerate(results):
-            # Iterate over the regocnised deliminators
             for key,value in self.deliminator_options.items():
-                # Check if the deliminator exists in the string
+                regexp=re.compile(f'({value})\l*')
                 if value in string:
                     s=results[index]
                     if len(string) > 1:
@@ -228,8 +229,9 @@ if __name__ == "__main__":
     # For Testing functionality of component
     s=ttk.Style()
     s.configure('TFrame',background='grey')
-    match=re.match(r"Drawing Title (.*)Sca",'Drawing Title The Lazy Cat Scale to A0')
-    
+    match=re.match(r"(Drawing Title)(.*)Sca","Drawing Title\r\nElectrical Services - Lighting and Controls Refle/cted Ceiling Plan Level 5\r\n\r\nScale at A1\r\n1 : 100\r\n",flags=re.S|re.M)
+    #match=re.match(r"Drawing Title (.*)Sca",'Drawing Title The Lazy Cat Scale to A0')
+    app.new_deliminator_regex()
     y=ttk.Button(root,text='new_file_name',command=lambda: print(app.new_file_name('CookBook','.pdf',match)))
     y.grid()
     app.add_tree_view_items(match)

@@ -11,9 +11,10 @@ logger = logging.getLogger(__name__)
 class BrowseDir(ttk.LabelFrame):
     """ Class that created a frame widget that contains some elements to select or manually enter in a directory """
     def __init__(self, master,lf_title):
-        ttk.LabelFrame.__init__(self,master,text=lf_title)
-        self.dir = tk.StringVar(master,name=f'{lf_title}_dir')
-        self.error_msg = tk.StringVar(master,name=f'{lf_title}_error_msg')
+        self.title=lf_title
+        ttk.LabelFrame.__init__(self,master,text=self.title)
+        self.dir = tk.StringVar(master,name=f'{self.title}_dir')
+        self.error_msg = tk.StringVar(master,name=f'{self.title}_error_msg')
         self.error_msg.set('')
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)
@@ -34,9 +35,9 @@ class BrowseDir(ttk.LabelFrame):
         """ Allows the user to select a directory """
         path = Path(self.dir.get())
         if path.exists() and path.is_dir():
-            filename=tk.filedialog.askdirectory(initialdir=path,title='Select a path')
+            filename=tk.filedialog.askdirectory(initialdir=path,title=f'Select a {self.title}')
         else:
-            filename=tk.filedialog.askdirectory(initialdir='.',title='Select a path')
+            filename=tk.filedialog.askdirectory(initialdir='.',title=f'Select a {self.title}')
         if filename != path and filename != '':
             self.dir.set(filename)
     

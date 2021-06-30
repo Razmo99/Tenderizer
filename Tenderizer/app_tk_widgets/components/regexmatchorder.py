@@ -23,7 +23,7 @@ class RegexMatchOrder(ttk.Labelframe):
             'Underscore':'_',
             'Period':'.'
         }
-        self.deliminator_regex=None
+        self.deliminator_regex=re.compile(r"(\-|\_|\ |\.)+",flags=re.M|re.S)
 
         self.new_tree_view_frame()
         self.new_tree_view()
@@ -38,17 +38,6 @@ class RegexMatchOrder(ttk.Labelframe):
         # Displays an example of what the selection will look like
         self.selection_preview_label = ttk.Label(self.details_frame, text='Nothing to display yet.',wraplength=300,justify=tk.LEFT)
         self.selection_preview_label.grid(sticky='nwe',pady=5,padx=5,row=3,column=0)
-
-    def new_deliminator_regex(self):
-        deliminators=[]
-        for key,value in self.deliminator_options.items():
-            deliminators.append(r"".join(value))
-            deliminators.append(r"|")
-        del deliminators[-1]
-        deliminators.append(r")\1*")
-        deliminators.insert(0,r"(")
-        complete_regex=r"".join(deliminators)
-        self.deliminator_regex=re.compile(complete_regex)
 
     def new_tree_view(self):
         """ Create treeview with columns and headers"""
@@ -198,7 +187,7 @@ class RegexMatchOrder(ttk.Labelframe):
             result=''.join(adjusted_deliminators)
         if result:
             # remove any character that are not in the '[]'
-            clean_special_char=re.sub(r'[^\d\w\-_\. \(\)]+','_',result)
+            clean_special_char=re.sub(r'[\/\\\|\<\>\?\"\*\:\,]+',selection_deliminator,result)
             return clean_special_char
 
     def set_match_deliminator(self,string_array):
@@ -209,14 +198,9 @@ class RegexMatchOrder(ttk.Labelframe):
         results=string_array.copy()
         selected_deliminator=self.get_deliminator()
         for index,string in enumerate(results):
-            for key,value in self.deliminator_options.items():
-                regexp=re.compile(f'({value})\l*')
-                if value in string:
-                    s=results[index]
-                    if len(string) > 1:
-                        s=s.strip()
-                    results[index]=s.replace(value,selected_deliminator)
-        return results
+
+            results[index]=re.sub(self.deliminator_regex,selected_deliminator,string.strip())
+        return results        
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -231,8 +215,7 @@ if __name__ == "__main__":
     s.configure('TFrame',background='grey')
     match=re.match(r"(Drawing Title)(.*)Sca","Drawing Title\r\nElectrical Services - Lighting and Controls Refle/cted Ceiling Plan Level 5\r\n\r\nScale at A1\r\n1 : 100\r\n",flags=re.S|re.M)
     #match=re.match(r"Drawing Title (.*)Sca",'Drawing Title The Lazy Cat Scale to A0')
-    app.new_deliminator_regex()
-    y=ttk.Button(root,text='new_file_name',command=lambda: print(app.new_file_name('CookBook','.pdf',match)))
+    y=ttk.Button(root,text='new_file_name',command=lambda: print(app.new_file_name('co-ordin--ets','.pdf',match)))
     y.grid()
     app.add_tree_view_items(match)
     app.grid(row=0,column=0)

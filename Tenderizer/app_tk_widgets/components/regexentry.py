@@ -1,9 +1,6 @@
-import tkinter.filedialog
 import tkinter as tk
-from tkinter.constants import CENTER
 import tkinter.ttk as ttk
 import re
-from .regexmatchorder import RegexMatchOrder
 
 """
 Goals of this class
@@ -35,10 +32,6 @@ class RegexEntry(ttk.Labelframe):
 
         # This adds all the check boxes for re flags
         self.addoptions()
-        
-        self.match_group_selector=RegexMatchOrder(self)
-        self.match_group_selector.grid(sticky='nsew',row=6,column=0)
-        #self.match_group_selector.grid
         self.recompile()
 
     def new_status_display_label(self):

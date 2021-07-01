@@ -32,7 +32,7 @@ class TestFileNamer(unittest.TestCase):
         self.str_multiple_match_groups='Drawing Title\nServices - \n\nLighting and\n\n Controls Level 6\n\nScale at A1\n\nRev\n\n05'
         self.suffix='.pdf'
 
-    def test_dedup(self):
+    def test_removeal_of_duplicate_deliminators(self):
         fn=self.file_namer
         match=re.search(
             r'Drawing Title(.*)Scale',
@@ -50,7 +50,7 @@ class TestFileNamer(unittest.TestCase):
             'DWG_XXX_XXX(6)_Services_Lighting_and_Controls_Level_6.pdf'
         )
     
-    def test_clean(self):
+    def test_cleanup_of_illegal_chars(self):
         fn=self.file_namer
         match=re.search(
             r'Drawing Title(.*)Scale',
@@ -65,7 +65,7 @@ class TestFileNamer(unittest.TestCase):
         )
         self.assertEqual(name,'DWG XXX XXX(6) Services East West  North   Level 6.pdf')
     
-    def test_match_order(self):     
+    def test_match_order_is_correct(self):     
         fn=self.file_namer
         match=re.search(
             r'Drawing Title(.*)Scale at A1.*?(Rev).*?(\d+)',
@@ -80,7 +80,7 @@ class TestFileNamer(unittest.TestCase):
         name=fn.new_file_name(self.prefix,self.suffix,match)
         self.assertEqual(name,'DWG.XXX.XXX(6).Services.Lighting.and.Controls.Level.6.05.Rev.pdf')
     
-    def test_removes_newline(self):
+    def test_removal_of_newline_chars(self):
         fn=self.file_namer
         match=re.search(
             r'Drawing Title(.*)Scale',

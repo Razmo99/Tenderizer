@@ -1,5 +1,3 @@
-#from test.test_browsedir import launch
-#launch()
 import unittest
 loader = unittest.TestLoader()
 start_dir = './test'

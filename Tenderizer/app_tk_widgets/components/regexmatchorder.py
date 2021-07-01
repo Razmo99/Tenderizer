@@ -127,7 +127,7 @@ class RegexMatchOrder(ttk.Labelframe):
         if self.selection_preview:
             # remove tail deliminator
             del self.selection_preview[-1]
-            self.selection_preview_label.configure(text=''.join(self.set_match_deliminator(self.selection_preview)))
+            self.selection_preview_label.configure(text=''.join(self._set_match_deliminator(self.selection_preview)))
         else:
             self.selection_preview_label.configure(text='No Matches')
 
@@ -163,34 +163,7 @@ class RegexMatchOrder(ttk.Labelframe):
     def on_deliminator_selection(self,val):
         self.compare_user_input()
 
-    def new_file_name(self,prefix,suffix,matches):
-        """ Generates a file name based on selection order and deliminator """
-        selection_deliminator=self.get_deliminator()
-        file_name=[]
-        result=''
-        for order in self.match_order:
-            try:
-                match=matches.group(order)
-            except IndexError:
-                logging.debug(f'Failed to find match order:{order}')
-            else:
-                file_name.append(match)
-                file_name.append(selection_deliminator)
-        
-        if file_name:
-            file_name.insert(0,selection_deliminator)
-            file_name.insert(0,prefix)
-            # remove the tail deliminator
-            del file_name[-1]
-            adjusted_deliminators=self.set_match_deliminator(file_name)
-            adjusted_deliminators.append(suffix)
-            result=''.join(adjusted_deliminators)
-        if result:
-            # remove any character that are not in the '[]'
-            clean_special_char=re.sub(r'[\/\\\|\<\>\?\"\*\:\,]+',selection_deliminator,result)
-            return clean_special_char
-
-    def set_match_deliminator(self,string_array):
+    def _set_match_deliminator(self,string_array):
         """ Takes in an array of strings,
             changes the deliminator to whats selected in the gui.
             Only processes deliminator options defined in the init of the class
@@ -198,25 +171,5 @@ class RegexMatchOrder(ttk.Labelframe):
         results=string_array.copy()
         selected_deliminator=self.get_deliminator()
         for index,string in enumerate(results):
-
             results[index]=re.sub(self.deliminator_regex,selected_deliminator,string.strip())
-        return results        
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = RegexMatchOrder(root)
-    root.protocol('WM_DELETE_WINDOW', root.quit)
-    root.option_add('*tearOff', tk.FALSE)
-    root.columnconfigure(0,weight=1)
-    root.rowconfigure(1,weight=1)
-    
-    # For Testing functionality of component
-    s=ttk.Style()
-    s.configure('TFrame',background='grey')
-    match=re.match(r"(Drawing Title)(.*)Sca","Drawing Title\r\nElectrical Services - Lighting and Controls Refle/cted Ceiling Plan Level 5\r\n\r\nScale at A1\r\n1 : 100\r\n",flags=re.S|re.M)
-    #match=re.match(r"Drawing Title (.*)Sca",'Drawing Title The Lazy Cat Scale to A0')
-    y=ttk.Button(root,text='new_file_name',command=lambda: print(app.new_file_name('co-ordin--ets','.pdf',match)))
-    y.grid()
-    app.add_tree_view_items(match)
-    app.grid(row=0,column=0)
-    root.mainloop()    
+        return results          

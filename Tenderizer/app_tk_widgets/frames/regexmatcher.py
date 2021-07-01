@@ -4,7 +4,8 @@ import logging
 import json
 from pathlib import Path, PurePath
 from ..components import RegexEntry, TreeView, RegexMatchOrder,RegexTester
-
+from ..utilities import FileNamer
+import re
 class RegexMatcher(ttk.Frame):
 
     def __init__(self,master):
@@ -20,13 +21,15 @@ class RegexMatcher(ttk.Frame):
         self.regex_entry = RegexEntry(self)
         self.regex_entry.grid(row=0,column=0)
 
+        self.file_namer = FileNamer(
+            re.compile(r'(\-|\_|\ |\.)+',flags=re.S|re.M),
+            re.compile(r'[\/\\\|\<\>\?\"\*\:\,]+',flags=re.S|re.M))
+
         self.match_group_selector=RegexMatchOrder(self.regex_entry)
         self.match_group_selector.grid(sticky='nsew',row=6,column=0)
-        # Method to generate a new pdf file name based on the selections in the RegexMatchOrder on screen
-        self.new_match_ordered_name=self.match_group_selector.new_file_name
-        # Method to update the tree view in the RegexMatchOrder on screen
+        self.new_match_ordered_name=self.file_namer.new_file_name
         self.new_match_order_examples=self.match_group_selector.add_tree_view_items
-        
+
         self.treeview = TreeView(self,'Match View',('Name','New Name'))
         self.treeview.grid(row=1,column=0)
         
@@ -38,6 +41,8 @@ class RegexMatcher(ttk.Frame):
     def set_files_new_name(self):
         """ Evaluates the dataset against the input re expression """
         dataset=self.dataset
+        self.file_namer.deliminator=self.match_group_selector.get_deliminator()
+        self.file_namer.match_order=self.match_group_selector.match_order
         if dataset:
             self.treeview.tree.delete(*self.treeview.tree.get_children())
             for pdf in dataset:

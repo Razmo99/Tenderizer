@@ -12,7 +12,6 @@ class Pdf():
     converted: bool
     id: str
     text_data: str
-    renamer_id: str
     regex_matches: re.Match
     regex_match_group: int
     new_name: str

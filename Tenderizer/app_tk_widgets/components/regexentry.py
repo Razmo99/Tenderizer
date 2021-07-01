@@ -1,13 +1,24 @@
-from os import name
-from pathlib import Path
-import logging
-import logging.handlers
 import tkinter.filedialog
 import tkinter as tk
 from tkinter.constants import CENTER
 import tkinter.ttk as ttk
 import re
 from .regexmatchorder import RegexMatchOrder
+
+"""
+Goals of this class
+
+* Manual input and calidation of regex
+* Selection of regex Flags
+
+Produced information
+* Compiled regex object
+
+Dependancies
+* None
+
+"""
+
 class RegexEntry(ttk.Labelframe):
     """Class that holds a entry box for regular expression with flags"""
     # This is a chopped up copy of regex tester demo on python.org
@@ -87,14 +98,3 @@ class RegexEntry(ttk.Labelframe):
             self.statusdisplay.config(
                     text=f"re.error: {str(msg)}",
                     background="red")
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = RegexEntry(root)
-    root.protocol('WM_DELETE_WINDOW', root.quit)
-    root.option_add('*tearOff', tk.FALSE)
-    root.grid_rowconfigure(0,weight=1)
-    root.grid_columnconfigure(0,weight=1)
-
-    root.mainloop()   

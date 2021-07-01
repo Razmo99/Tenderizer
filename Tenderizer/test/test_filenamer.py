@@ -28,7 +28,7 @@ class TestFileNamer(unittest.TestCase):
         self.string0='Drawing Title\nServices - Lighting and Controls Level 6\n\nScale at A1'
         self.str_w_illegal_chars='Drawing Title\nServices - East\West <North> *Level 6\n\nScale at A1'
         self.string2='Drawing Title\nServices - Lighting and Controls Level 6\n\nScale at A1'
-        self.string3='Drawing Title\nServices - \n\nLighting and\n\n Controls Level 6\n\nScale at A1'
+        self.str_newlines='Drawing Title\nServices - \n\nLighting and\n\n Controls Level 6\n\nScale at A1'
         self.str_multiple_match_groups='Drawing Title\nServices - \n\nLighting and\n\n Controls Level 6\n\nScale at A1\n\nRev\n\n05'
         self.suffix='.pdf'
 
@@ -64,7 +64,8 @@ class TestFileNamer(unittest.TestCase):
             match
         )
         self.assertEqual(name,'DWG XXX XXX(6) Services East West  North   Level 6.pdf')
-    def test_match_order(self):        
+    
+    def test_match_order(self):     
         fn=self.file_namer
         match=re.search(
             r'Drawing Title(.*)Scale at A1.*?(Rev).*?(\d+)',
@@ -72,11 +73,20 @@ class TestFileNamer(unittest.TestCase):
             flags=re.M|re.S)
         fn.deliminator=' '
         fn.match_order=[1,2,3]
-        name=fn.new_file_name(
-            self.prefix,
-            self.suffix,
-            match
-        )
+        name=fn.new_file_name(self.prefix,self.suffix,match)
         self.assertEqual(name,'DWG XXX XXX(6) Services Lighting and Controls Level 6 Rev 05.pdf')
+        fn.match_order=[1,3,2]
+        fn.deliminator='.'
+        name=fn.new_file_name(self.prefix,self.suffix,match)
+        self.assertEqual(name,'DWG.XXX.XXX(6).Services.Lighting.and.Controls.Level.6.05.Rev.pdf')
+    
     def test_removes_newline(self):
-        pass
+        fn=self.file_namer
+        match=re.search(
+            r'Drawing Title(.*)Scale',
+            self.str_newlines,
+            flags=re.M|re.S)
+        fn.deliminator='-'
+        fn.match_order=[1]
+        name=fn.new_file_name(self.prefix,self.suffix,match)
+        self.assertEqual(name,'DWG-XXX-XXX(6)-Services-Lighting-and-Controls-Level-6.pdf')

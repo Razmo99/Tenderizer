@@ -6,11 +6,19 @@ logger = logging.getLogger(__name__)
 class FileNamer():
     """ Class to facilitate renaming files"""
     def __init__(self,de_dup_regexp,clean_regexp):
-        #r'[\/\\\|\<\>\?\"\*\:\,]+'
         self.de_dup_regexp=de_dup_regexp
         self.clean_regexp=clean_regexp
+        self.newline_regexp=re.compile(r"[\r\n|\n|\r]+",flags=re.M|re.S)
         self.match_order=[]
         self.deliminator='_'
+
+    def clear_illegal_char(self,string):
+        """ clears characters targeted by the specified regex on class init, replaced with selected deliminator """
+        return re.sub(self.clean_regexp,self.deliminator,string)
+
+    def remove_newline(self,string):
+        """ Removes newline chars \n \r \r\n """
+        return re.sub(self.newline_regexp,'',string)
 
     def set_match_deliminator(self,string_array):
         """ Takes in an array of strings,
@@ -19,12 +27,13 @@ class FileNamer():
         """
         results=string_array.copy()
         for index,string in enumerate(results):
-            results[index]=re.sub(self.de_dup_regexp,self.deliminator,string.strip())
+            s=string.strip() if len(string) > 1 else string
+            results[index]=re.sub(self.de_dup_regexp,self.deliminator,self.remove_newline(s))
         return results
 
     def new_file_name(self,prefix,suffix,matches):
         """ Generates a file name based on selection order and deliminator """
-        file_name=self.initialize_file_name(matches)
+        file_name=self._initialize_file_name(matches)
         
         if file_name:
             file_name.insert(0,self.deliminator)
@@ -34,9 +43,9 @@ class FileNamer():
             adjusted_deliminators=self.set_match_deliminator(file_name)
             adjusted_deliminators.append(suffix)
             result=''.join(adjusted_deliminators)
-            return re.sub(self.clean_regexp,self.deliminator,result)
+            return self.clear_illegal_char(result)
 
-    def initialize_file_name(self, matches):
+    def _initialize_file_name(self, matches):
         """ Initialize the core file name based on regex results"""
         results=[]
         for match_id in self.match_order:

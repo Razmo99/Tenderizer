@@ -9,7 +9,6 @@ class TestRegexEntry(TKinterTestCase):
     Goals of this class
 
     * Manual input and validation of regex
-    * Selection of regex Flags
 
     Produced information
     * Compiled regex object
@@ -33,8 +32,8 @@ class TestRegexEntry(TKinterTestCase):
         self.assertEqual(regex.statusdisplay.cget('text'),'')
         self.assertNotEqual(regex.compiled,None)
 
-    def test_flag_selection(self):
-        pass
+
+
 
 
 

@@ -2,20 +2,6 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import re
 
-"""
-Goals of this class
-
-* Manual input and calidation of regex
-* Selection of regex Flags
-
-Produced information
-* Compiled regex object
-
-Dependancies
-* None
-
-"""
-
 class RegexEntry(ttk.Labelframe):
     """Class that holds a entry box for regular expression with flags"""
     # This is a chopped up copy of regex tester demo on python.org
@@ -78,7 +64,7 @@ class RegexEntry(ttk.Labelframe):
         flags = 0
         for var in self.vars:
             flags = flags | var.get()
-        return flags        
+        return flags
 
     def recompile(self, event=None):
         """Recompliles the Regular Expression and updates the statusdisplay"""

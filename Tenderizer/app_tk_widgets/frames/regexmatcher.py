@@ -25,7 +25,7 @@ class RegexMatcher(ttk.Frame):
             re.compile(r'(\-|\_|\ |\.)+',flags=re.S|re.M),
             re.compile(r'[\/\\\|\<\>\?\"\*\:\,]+',flags=re.S|re.M))
 
-        self.match_group_selector=RegexMatchOrder(self.regex_entry)
+        self.match_group_selector=RegexMatchOrder(self.regex_entry,self.file_namer)
         self.match_group_selector.grid(sticky='nsew',row=6,column=0)
         self.new_match_ordered_name=self.file_namer.new_file_name
         self.new_match_order_examples=self.match_group_selector.add_tree_view_items
@@ -41,8 +41,6 @@ class RegexMatcher(ttk.Frame):
     def set_files_new_name(self):
         """ Evaluates the dataset against the input re expression """
         dataset=self.dataset
-        self.file_namer.deliminator=self.match_group_selector.get_deliminator()
-        self.file_namer.match_order=self.match_group_selector.match_order
         if dataset:
             self.treeview.tree.delete(*self.treeview.tree.get_children())
             for pdf in dataset:
@@ -79,7 +77,6 @@ class RegexMatcher(ttk.Frame):
 
     def rename_files(self):
         if self.dataset:
-            # Iterate over the data set
             for pdf in self.dataset:
                 input_path=Path(pdf.input_path)
                 rename_path=input_path.parent / pdf.new_name

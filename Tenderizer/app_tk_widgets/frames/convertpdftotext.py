@@ -28,7 +28,7 @@ class ConvertPdfToText(ttk.Frame):
         self.treeview = TreeView(self,'PDF View',('Name','Input Path','Output Path',))
         self.treeview.grid(row=2,column=0)
         # Configure the buttons in the treeview class
-        self.treeview.load_button.configure(command=self.load_pdf_paths)
+        self.treeview.load_button.configure(command=self.new_pdf_input_output_paths)
         self.treeview.convert_button.configure(command=self.convert_paths)
         # Holds information about converted PDF's
         self.dataset=self.master.dataset
@@ -57,7 +57,7 @@ class ConvertPdfToText(ttk.Frame):
         else:
             self.treeview.load_button.configure(state='disabled')
     
-    def convert_paths(self):
+    def convert_paths(self) -> None:
         """Convert PDF's to text"""
         for pdf in self.dataset:
             output_path=Path(pdf.output_path)
@@ -66,18 +66,17 @@ class ConvertPdfToText(ttk.Frame):
                 o=output_path
             )
             if x == 0:
-                try:
-                    # read the text document and add it to the data set
-                    with output_path.open('r') as p:
-                        txt=p.read()
-                        pdf.text_data=txt   
-                except:
-                    raise
-                else:
-                    pdf.converted=True
+                self.read_pdf_text(pdf, output_path)
             else:
                 logging.debug(f'Failed to convert: {pdf.input_path.resolve()}')
                 pdf.converted=False
+    
+    def read_pdf_text(self, pdf: Pdf, output_path: Path) -> None:
+        """ Read generated txt from pdf doc add it to pdf object"""
+        with output_path.open('r') as p:
+            txt=p.read()
+            pdf.text_data=txt
+        pdf.converted=True
 
     def scan_tree(self,path):
         """Recursively yield DirEntry objects for given directory."""
@@ -88,7 +87,32 @@ class ConvertPdfToText(ttk.Frame):
                 else:
                     yield entry    
     
-    def load_pdf_paths(self):
+    def import_pdf(self,dir_entry: os.DirEntry) -> Pdf:
+        """ import pdf from path """
+        scan_path=PurePath(dir_entry)
+        if scan_path.suffix == '.pdf' and dir_entry.is_file:
+            pdf=Pdf(scan_path)
+            self.dataset.append(pdf)
+            return pdf
+
+
+    def new_pdf_input_output_paths(self) -> None:
+        """ Load pdf path information from the specified directory """
+        self.treeview.tree.delete(*self.treeview.tree.get_children())
+        del self.dataset[:]
+        input_dir=Path(self.input.dir.get())
+        output_dir=PurePath(self.output.dir.get())
+        for dir_entry in self.scan_tree(input_dir):
+            pdf=self.import_pdf(dir_entry)
+            if pdf:
+                pdf.input_dir=PurePath(input_dir)
+                pdf.output_dir=output_dir
+                pdf.set_output_path()
+                tv_values = [dir_entry.name,dir_entry.path,pdf.output_path]
+                tv_id = self.treeview.tree.insert('','end',values=tv_values)
+                pdf.id=tv_id
+
+    def _new_pdf_input_output_paths(self) -> None:
         """ Load pdf path information from the specified directory """
         self.treeview.tree.delete(*self.treeview.tree.get_children())
         del self.dataset[:]
@@ -102,7 +126,7 @@ class ConvertPdfToText(ttk.Frame):
             if scan_path.suffix == '.pdf' :
                 tv_values = [scan.name,scan.path,scan_output_path]
                 tv_id = self.treeview.tree.insert('','end',values=tv_values)
-                pdf = Pdf(tv_id,scan.name,PurePath(scan.path))
+                pdf = Pdf(tv_id,PurePath(scan.path))
                 pdf.output_path=PurePath(scan_output_path)
-                pdf.relative_output_path=PurePath(scan_path_rel_input_dir)
+                pdf.input_dir=PurePath(scan_path_rel_input_dir)
                 self.dataset.append(pdf)

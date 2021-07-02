@@ -47,7 +47,7 @@ class TreeView(ttk.LabelFrame):
         self.load_frame.grid_rowconfigure(1,weight=1)
         self.load_frame.grid_columnconfigure(0,weight=1)
 
-        self.load_button = ttk.Button(self.load_frame,text='Load',state='disabled')
+        self.load_button = ttk.Button(self.load_frame,text='Load',state=tk.DISABLED)
         self.load_button.grid(row=0,column=0,sticky='nw',padx=5,pady=5)
         # Button to Convert Directory
         self.converted_frame = ttk.Frame(self)
@@ -55,7 +55,7 @@ class TreeView(ttk.LabelFrame):
         self.converted_frame.grid_rowconfigure(1,weight=1)
         self.converted_frame.grid_columnconfigure(0,weight=1)
 
-        self.convert_button=ttk.Button(self.converted_frame,text='Convert',state='disabled')
+        self.convert_button=ttk.Button(self.converted_frame,text='Convert',state=tk.DISABLED)
         self.convert_button.grid(row=2,column=0,padx=5,pady=5,sticky='nw')
         
         self.right_click_selection_menu = RightClickSelection(self)

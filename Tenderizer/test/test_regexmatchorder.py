@@ -1,4 +1,3 @@
-from unittest.case import expectedFailure
 from app_tk_widgets import RegexMatchOrder
 from tkintertestcase import TKinterTestCase
 import re

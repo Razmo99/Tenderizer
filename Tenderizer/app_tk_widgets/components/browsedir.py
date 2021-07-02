@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path,PurePath
 import logging
 import logging.handlers
 import tkinter.filedialog
@@ -40,7 +40,7 @@ class BrowseDir(ttk.LabelFrame):
         else:
             filename=tk.filedialog.askdirectory(initialdir='.',title=f'Select a {self.title}')
         if filename != path and filename != '':
-            self.dir.set(filename)
+            self.dir.set(PurePath(filename))
             self.assert_dir()
     
     def assert_dir(self,event=None):

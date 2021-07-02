@@ -36,9 +36,9 @@ class ConvertPdfToText(ttk.Frame):
         self.pdftotext=PDFToText(Path('xpdf/pdftotext.exe'))
 
         #TODO ! Remove these after testing
-        self.input.dir.set("C:/Projects/o_elec_weird - Copy")
+        self.input.dir.set("C:\Projects\o_elec_weird - Copy")
         self.input.assert_dir()
-        self.output.dir.set("C:/Projects/o_Elec_draw_char")
+        self.output.dir.set("C:\Projects\o_Elec_draw_char")
         self.output.assert_dir()
     
     def callback_treeview_convert_button(self,var,indx,mode):

@@ -6,7 +6,6 @@ import logging.handlers
 from tkinter.constants import ANCHOR
 from typing import Text
 from dotenv import load_dotenv
-from pdf_utils import scan_tree, execute_pdftotext
 import tkinter.filedialog
 import tkinter as tk
 import tkinter.ttk as ttk

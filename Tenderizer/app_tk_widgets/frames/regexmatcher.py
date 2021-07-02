@@ -108,5 +108,6 @@ class RegexMatcher(ttk.Frame):
         self.regex_tester.regexdisplay.insert(0,self.regex_entry.var.get())
         self.regex_tester.stringdisplay.delete(1.0,tk.END)
         self.regex_tester.stringdisplay.insert(1.0,text_data)
-
+        for i,val in enumerate(self.regex_tester.vars):
+            val.set(self.regex_entry.vars[i].get())
         self.regex_tester.recompile()

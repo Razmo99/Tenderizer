@@ -51,7 +51,7 @@ class RegexMatcher(ttk.Frame):
             if dataset[1].converted and dataset[1].regex_matches:
                 self.new_match_order_examples(dataset[1].regex_matches)
     
-    def confirm_re_compiled(self):
+    def get_compiled_re(self):
         """ Checks that the re is compiled and no syntax warnings are present"""
         re_compiled = self.regex_entry.compiled
         re_compiled_status = self.regex_entry.statusdisplay.cget('text')
@@ -61,19 +61,17 @@ class RegexMatcher(ttk.Frame):
     def search_re_expression(self, pdf):
         if pdf.converted:
             # Check if the regex entry is valid and compiled
-            compiled_re=self.confirm_re_compiled()
-            if  compiled_re:
-                re_matches=compiled_re.search(pdf.text_data)
-                if not re_matches is None:
-                    # Update the dataset
-                    pdf.regex_matches=re_matches
-                    # Construct the new file name
+            compiled_regex=self.get_compiled_re()
+            if compiled_regex:
+                re_match=compiled_regex.search(pdf.text_data)
+                if not re_match is None:
+                    pdf.regex_matches=re_match
                     suffix=pdf.input_path.suffix
                     prefix=pdf.name.replace(suffix,'')
-                    new_name = self.new_match_ordered_name(prefix,suffix,re_matches)
-                    if new_name:
-                        pdf.new_name=new_name
-                        return new_name
+                    new_file_name = self.new_match_ordered_name(prefix,suffix,re_match)
+                    if new_file_name:
+                        pdf.new_name=new_file_name
+                        return new_file_name
 
     def rename_files(self):
         if self.dataset:

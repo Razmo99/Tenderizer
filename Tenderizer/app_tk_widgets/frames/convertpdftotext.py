@@ -28,42 +28,45 @@ class ConvertPdfToText(ttk.Frame):
         self.treeview = TreeView(self,'PDF View',('Name','Input Path','Output Path',))
         self.treeview.grid(row=2,column=0)
         # Configure the buttons in the treeview class
-        self.treeview.load_button.configure(command=self.import_pdfs)
-        self.treeview.convert_button.configure(command=self.convert_paths)
+        self.load_btn=self.treeview.load_button
+        self.convert_btn=self.treeview.convert_button
+        self.load_btn.configure(command=self.import_pdfs)
+        self.convert_btn.configure(command=self.convert_paths)
         # Holds information about converted PDF's
         self.dataset=self.master.dataset
         
         self.pdftotext=PDFToText(Path('xpdf/pdftotext.exe'))
-
-        #TODO ! Remove these after testing
-        self.input.dir.set("C:\Projects\o_elec_weird - Copy")
-        self.input.assert_dir()
-        self.output.dir.set("C:\Projects\o_Elec_draw_char")
-        self.output.assert_dir()
     
+    def get_load_state(self) -> str:
+        state=self.load_btn.cget('state')
+        return state
+    
+    def get_convert_state(self) -> str:
+        return self.convert_btn.cget('state')
+
     def callback_treeview_convert_button(self,var,indx,mode):
         """ Controls the state of the Output button in the treeview based on if the input path is valid """
         err=self.output.error_msg.get()
         if not err:
-            self.treeview.convert_button.configure(state='normal')
+            self.convert_btn.configure(state=tk.NORMAL)
         else:
-            self.treeview.convert_button.configure(state='disabled')
+            self.convert_btn.configure(state=tk.DISABLED)
     
     def callback_treeview_load_button(self,var,indx,mode):
         """ Controls the state of the load button in the treeview based on if the input path is valid """
         err=self.input.error_msg.get()
         if not err:
-            self.treeview.load_button.configure(state='normal')
+            self.load_btn.configure(state=tk.NORMAL)
         else:
-            self.treeview.load_button.configure(state='disabled')
+            self.load_btn.configure(state=tk.DISABLED)
     
     def convert_paths(self) -> None:
         """Convert PDF's to text"""
         for pdf in self.dataset:
             output_path=Path(pdf.output_path)
             x=self.pdftotext.execute(
-                p=Path(pdf.input_path),
-                o=output_path
+                input_path=Path(pdf.input_path),
+                output=output_path
             )
             if x == 0:
                 self.read_pdf_text(pdf, output_path)

@@ -3,12 +3,13 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import re
 import logging
+from ..utilities import FileNamer
 logger = logging.getLogger(__name__)
 
 class RegexMatchOrder(ttk.Labelframe):
     """Class that facilitates the ordering or regex matches"""
 
-    def __init__(self ,master):
+    def __init__(self ,master,filenamer=None) -> None:
         # Init the parent frame and grid it.
         ttk.Frame.__init__(self,master)
         self.grid(sticky='nsew',padx=5,pady=5)
@@ -23,7 +24,13 @@ class RegexMatchOrder(ttk.Labelframe):
             'Underscore':'_',
             'Period':'.'
         }
-        self.deliminator_regex=re.compile(r"(\-|\_|\ |\.)+",flags=re.M|re.S)
+        if filenamer:
+            self.filenamer=filenamer
+        else:
+            self.filenamer=FileNamer(
+                re.compile(r"(\-|\_|\ |\.)+",flags=re.M|re.S),
+                re.compile(r"(\n|\r|\r\n)+",flags=re.M|re.S),
+            )
 
         self.new_tree_view_frame()
         self.new_tree_view()
@@ -36,8 +43,10 @@ class RegexMatchOrder(ttk.Labelframe):
         self.new_deliminator_option_menu()
 
         # Displays an example of what the selection will look like
-        self.selection_preview_label = ttk.Label(self.details_frame, text='Nothing to display yet.',wraplength=300,justify=tk.LEFT)
-        self.selection_preview_label.grid(sticky='nwe',pady=5,padx=5,row=3,column=0)
+        self.preview_label_var = tk.StringVar(self)
+        self.preview_label = ttk.Label(self.details_frame, textvariable=self.preview_label_var,wraplength=300,justify=tk.LEFT)
+        self.preview_label.grid(sticky='nwe',pady=5,padx=5,row=3,column=0)
+        self.preview_label_var.set('Nothing to display yet.')
 
     def new_tree_view(self):
         """ Create treeview with columns and headers"""
@@ -71,17 +80,17 @@ class RegexMatchOrder(ttk.Labelframe):
 
     def new_deliminator_option_menu(self):
         """Spinbox that lets the user select the regex match deliminator"""
-        self.deliminator_label = ttk.Label(self.deliminator_frame,text='Deliminator:')
-        self.deliminator_label.grid(row=0,column=0,sticky="nw",padx=5,pady=5)
+        self.option_menu_label = ttk.Label(self.deliminator_frame,text='Deliminator:')
+        self.option_menu_label.grid(row=0,column=0,sticky="nw",padx=5,pady=5)
 
-        self.deliminator_var=tk.StringVar()
-        self.deliminator=ttk.OptionMenu(self.deliminator_frame,
-            self.deliminator_var,
+        self.option_menu_var=tk.StringVar()
+        self.option_menu=ttk.OptionMenu(self.deliminator_frame,
+            self.option_menu_var,
             'Choose',
             *self.deliminator_options.keys(),
             direction='below',
             command=self.on_deliminator_selection)
-        self.deliminator.grid(row=0,column=1,sticky="nw",padx=5,pady=5)
+        self.option_menu.grid(row=0,column=1,sticky="nw",padx=5,pady=5)
 
     def new_deliminator_frame(self):
         """Hold re deliminator spinbox"""
@@ -107,7 +116,8 @@ class RegexMatchOrder(ttk.Labelframe):
         """ Adds items to the tree view  """
         self.tree.delete(*self.tree.get_children())
         for index,group in enumerate(match.groups(),start=1):
-            tv_values=[index,group.strip()]
+            example_value=self.filenamer.remove_newline(group)
+            tv_values=[index,example_value.strip()]
             self.tree.insert('','end',iid=index,values=tv_values)
         self.compare_user_input
 
@@ -127,9 +137,11 @@ class RegexMatchOrder(ttk.Labelframe):
         if self.selection_preview:
             # remove tail deliminator
             del self.selection_preview[-1]
-            self.selection_preview_label.configure(text=''.join(self._set_match_deliminator(self.selection_preview)))
+            self.filenamer.deliminator=self.get_deliminator()
+            self.filenamer.match_order=self.match_order
+            self.preview_label_var.set(''.join(self.filenamer.set_match_deliminator(self.selection_preview)))
         else:
-            self.selection_preview_label.configure(text='No Matches')
+            self.preview_label_var.set('No Matches')
 
     def update_selections(self):
         """ Makes sure that the selections entered are valid re Match Groups"""
@@ -145,7 +157,7 @@ class RegexMatchOrder(ttk.Labelframe):
     def get_deliminator(self):
         """ return the selected deliminator or 
         returns the first deliminator in the available options if no option is choosen yet """
-        current_selection=self.deliminator_options.get(self.deliminator_var.get())
+        current_selection=self.deliminator_options.get(self.option_menu_var.get())
         if current_selection:
             return current_selection
         else:
@@ -161,15 +173,4 @@ class RegexMatchOrder(ttk.Labelframe):
             self.entry.unbind('<FocusIn>')
 
     def on_deliminator_selection(self,val):
-        self.compare_user_input()
-
-    def _set_match_deliminator(self,string_array):
-        """ Takes in an array of strings,
-            changes the deliminator to whats selected in the gui.
-            Only processes deliminator options defined in the init of the class
-        """
-        results=string_array.copy()
-        selected_deliminator=self.get_deliminator()
-        for index,string in enumerate(results):
-            results[index]=re.sub(self.deliminator_regex,selected_deliminator,string.strip())
-        return results          
+        self.compare_user_input()        

@@ -65,7 +65,7 @@ class TestFileNamer(unittest.TestCase):
         )
         self.assertEqual(name,'DWG XXX XXX(6) Services East West  North   Level 6.pdf')
     
-    def test_match_order_is_correct(self):     
+    def test_match_order_is_correct(self):
         fn=self.file_namer
         match=re.search(
             r'Drawing Title(.*)Scale at A1.*?(Rev).*?(\d+)',

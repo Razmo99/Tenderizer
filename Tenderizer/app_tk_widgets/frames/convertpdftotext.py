@@ -28,7 +28,7 @@ class ConvertPdfToText(ttk.Frame):
         self.treeview = TreeView(self,'PDF View',('Name','Input Path','Output Path',))
         self.treeview.grid(row=2,column=0)
         # Configure the buttons in the treeview class
-        self.treeview.load_button.configure(command=self.new_pdf_input_output_paths)
+        self.treeview.load_button.configure(command=self.import_pdfs)
         self.treeview.convert_button.configure(command=self.convert_paths)
         # Holds information about converted PDF's
         self.dataset=self.master.dataset
@@ -87,46 +87,26 @@ class ConvertPdfToText(ttk.Frame):
                 else:
                     yield entry    
     
-    def import_pdf(self,dir_entry: os.DirEntry) -> Pdf:
+    def new_pdf(self,dir_entry: os.DirEntry,input_dir:PurePath,output_dir:PurePath) -> Pdf:
         """ import pdf from path """
         scan_path=PurePath(dir_entry)
-        if scan_path.suffix == '.pdf' and dir_entry.is_file:
+        if dir_entry.is_file and scan_path.suffix == '.pdf':
             pdf=Pdf(scan_path)
-            self.dataset.append(pdf)
+            pdf.input_dir=PurePath(input_dir)
+            pdf.output_dir=output_dir
+            pdf.set_output_path()
             return pdf
 
-
-    def new_pdf_input_output_paths(self) -> None:
+    def import_pdfs(self) -> None:
         """ Load pdf path information from the specified directory """
         self.treeview.tree.delete(*self.treeview.tree.get_children())
         del self.dataset[:]
         input_dir=Path(self.input.dir.get())
         output_dir=PurePath(self.output.dir.get())
         for dir_entry in self.scan_tree(input_dir):
-            pdf=self.import_pdf(dir_entry)
+            pdf=self.new_pdf(dir_entry,PurePath(input_dir),output_dir)
             if pdf:
-                pdf.input_dir=PurePath(input_dir)
-                pdf.output_dir=output_dir
-                pdf.set_output_path()
-                tv_values = [dir_entry.name,dir_entry.path,pdf.output_path]
+                self.dataset.append(pdf)
+                tv_values = [pdf.name,pdf.input_path,pdf.output_path]
                 tv_id = self.treeview.tree.insert('','end',values=tv_values)
                 pdf.id=tv_id
-
-    def _new_pdf_input_output_paths(self) -> None:
-        """ Load pdf path information from the specified directory """
-        self.treeview.tree.delete(*self.treeview.tree.get_children())
-        del self.dataset[:]
-        input_dir=Path(self.input.dir.get())
-        output_dir=PurePath(self.output.dir.get())
-        for scan in self.scan_tree(input_dir):
-            scan_path=PurePath(scan)
-            scan_path_rel_input_dir=scan_path.relative_to(input_dir)
-            scan_output_dir=output_dir.joinpath(scan_path_rel_input_dir)
-            scan_output_path = scan_output_dir.parent.joinpath(scan_output_dir.name.replace('.pdf','.txt'))
-            if scan_path.suffix == '.pdf' :
-                tv_values = [scan.name,scan.path,scan_output_path]
-                tv_id = self.treeview.tree.insert('','end',values=tv_values)
-                pdf = Pdf(tv_id,PurePath(scan.path))
-                pdf.output_path=PurePath(scan_output_path)
-                pdf.input_dir=PurePath(scan_path_rel_input_dir)
-                self.dataset.append(pdf)

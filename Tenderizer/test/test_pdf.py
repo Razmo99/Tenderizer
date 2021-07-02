@@ -14,7 +14,7 @@ class TestPdf(unittest.TestCase):
 
     def test_path_rel_input_dir(self):
         x=self.pdf.get_input_path_rel_dir()
-        self.assertEqual(x,PurePath('PDFS/SomePDF.pdf'))
+        self.assertEqual(x,PurePath('PDFS\SomePDF.pdf'))
 
     def test_generate_output_path(self):
         self.pdf.set_output_path()

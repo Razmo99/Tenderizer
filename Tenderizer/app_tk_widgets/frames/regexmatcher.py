@@ -1,3 +1,4 @@
+from os import stat
 import tkinter as tk
 import tkinter.ttk as ttk
 import logging
@@ -33,8 +34,11 @@ class RegexMatcher(ttk.Frame):
         self.treeview = TreeView(self,'Match View',('Name','New Name'))
         self.treeview.grid(row=1,column=0)
         
-        self.treeview.load_button.configure(command=self.set_files_new_name,state='normal')
-        self.treeview.convert_button.configure(command=self.rename_files,state='normal',text='Rename')
+        self.rename_btn=self.treeview.convert_button
+        self.load_btn=self.treeview.load_button
+
+        self.load_btn.configure(command=self.set_files_new_name,state=tk.NORMAL)
+        self.rename_btn.configure(command=self.rename_files,state=tk.NORMAL,text='Rename')
 
         self.treeview.right_click_selection_menu.add_command(label='Regex Utility',command=lambda :self.open_regex_util())
 
@@ -45,9 +49,14 @@ class RegexMatcher(ttk.Frame):
             self.treeview.tree.delete(*self.treeview.tree.get_children())
             for pdf in dataset:
                 tv_new_name=self.search_re_expression(pdf)
+                tv_args=()
                 if isinstance(tv_new_name,str):
-                    tv_new_name = tv_new_name[:512]
-                self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,tv_new_name])
+                    tv_new_name = tv_new_name[:1024]
+                    if len(tv_new_name) == 1024:
+                        tv_args=('red')
+                    elif pdf.get_rename_path_len() > 256:
+                        tv_args=('yellow')
+                self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,tv_new_name],tags=tv_args)
             if dataset[1].converted and dataset[1].regex_matches:
                 self.new_match_order_examples(dataset[1].regex_matches)
     
@@ -77,22 +86,26 @@ class RegexMatcher(ttk.Frame):
         if self.dataset:
             for pdf in self.dataset:
                 input_path=Path(pdf.input_path)
-                rename_path=input_path.parent / pdf.new_name
+                rename_path=Path(pdf.get_rename_path())
                 output={
                     'operation': 'rename',
                     'input_path': f'{input_path.resolve()}',
                     'rename_path': f'{rename_path.resolve()}',
                     'completed': True
                 }
+                self.treeview.tree.item(pdf.id,tags=('green'))
                 try:
                     pdf.rename_op=(input_path,rename_path)
                     input_path.rename(rename_path)
-                except:
+                except FileNotFoundError as e:
                     output['completed']=False
                     logging.exception(json.dumps(output))
-                    raise
+                    self.treeview.tree.item(pdf.id,tags=('red'))
+                    tk.messagebox.showerror("Error", f'Failed to find: {e.filename}')
                 else:
+                    self.treeview.tree.item(pdf.id,tags=('green'))
                     logging.info(json.dumps(output))
+        self.rename_btn.configure(state=tk.DISABLED)
     
     def open_regex_util(self):
         x=tk.Toplevel(self.master)

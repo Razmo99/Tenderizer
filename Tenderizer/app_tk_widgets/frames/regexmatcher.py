@@ -1,4 +1,4 @@
-from os import stat
+from os import stat, strerror
 import tkinter as tk
 import tkinter.ttk as ttk
 import logging
@@ -48,18 +48,25 @@ class RegexMatcher(ttk.Frame):
         if dataset:
             self.treeview.tree.delete(*self.treeview.tree.get_children())
             for pdf in dataset:
-                tv_new_name=self.search_re_expression(pdf)
-                tv_args=()
-                if isinstance(tv_new_name,str):
-                    tv_new_name = tv_new_name[:1024]
-                    if len(tv_new_name) == 1024:
-                        tv_args=('red')
-                    elif pdf.get_rename_path_len() > 256:
-                        tv_args=('yellow')
-                self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,tv_new_name],tags=tv_args)
-            if dataset[1].converted and dataset[1].regex_matches:
-                self.new_match_order_examples(dataset[1].regex_matches)
+                if pdf.converted:                
+                    tv_new_name=self.search_re_expression(pdf)
+                    if isinstance(tv_new_name,str):
+                        tv_new_name = pdf.new_name[:1024]                        
+                    tv_flags=self.set_pdf_color_flags(pdf)
+                    self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,tv_new_name],tags=tv_flags)
+            example=next(pdf.regex_matches for pdf in dataset if pdf.converted and pdf.regex_matches)
+            if example:
+                self.new_match_order_examples(example)
     
+    def set_pdf_color_flags(self,pdf):
+        tv_args=()
+        if hasattr(pdf,'new_name'):
+            if len(pdf.new_name) >= 1024:
+                tv_args=('red')
+            elif pdf.get_rename_path_len() > 256:
+                tv_args=('yellow')
+        return tv_args
+
     def get_compiled_re(self):
         """ Checks that the re is compiled and no syntax warnings are present"""
         re_compiled = self.regex_entry.compiled
@@ -101,7 +108,12 @@ class RegexMatcher(ttk.Frame):
                     output['completed']=False
                     logging.exception(json.dumps(output))
                     self.treeview.tree.item(pdf.id,tags=('red'))
-                    tk.messagebox.showerror("Error", f'Failed to find: {e.filename}')
+                    tk.messagebox.showerror("FileNotFoundError", e.__str__())
+                except PermissionError as e:
+                    output['completed']=False
+                    logging.exception(json.dumps(output))
+                    self.treeview.tree.item(pdf.id,tags=('red'))
+                    tk.messagebox.showerror("PermissionError", e.__str__())
                 except:
                     output['completed']=False
                     logging.exception(json.dumps(output))

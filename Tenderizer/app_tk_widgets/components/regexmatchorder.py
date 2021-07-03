@@ -52,7 +52,7 @@ class RegexMatchOrder(ttk.Labelframe):
         """ Create treeview with columns and headers"""
         self.tree = ttk.Treeview(self.tv_frame,columns=['ID','Example Value'],show='headings')
         
-        self.tree.column('ID',stretch=tk.YES,width=10)
+        self.tree.column('ID',stretch=tk.NO,width=50)
         self.tree.heading('ID',text='ID',anchor=tk.CENTER)
         self.tree.column('Example Value',stretch=tk.YES)
         self.tree.heading('Example Value',text='Example Value',anchor=tk.CENTER)
@@ -139,7 +139,13 @@ class RegexMatchOrder(ttk.Labelframe):
             del self.selection_preview[-1]
             self.filenamer.deliminator=self.get_deliminator()
             self.filenamer.match_order=self.match_order
-            self.preview_label_var.set(''.join(self.filenamer.set_match_deliminator(self.selection_preview)))
+            preview_text=''.join(self.filenamer.set_match_deliminator(self.selection_preview))
+
+            if len(preview_text) > 1024:
+                self.preview_label.configure(foreground='red')
+            else:
+                self.preview_label.configure(foreground='')
+            self.preview_label_var.set(preview_text[:1024])
         else:
             self.preview_label_var.set('No Matches')
 
@@ -151,7 +157,7 @@ class RegexMatchOrder(ttk.Labelframe):
             if selection in tv_ids:
                 self.match_order.append(int(selection))
                 tv_values=self.tree.set(selection)
-                self.selection_preview.append(tv_values['Example Value'])
+                self.selection_preview.append(tv_values['Example Value'][:512])
                 self.selection_preview.append(self.get_deliminator())
 
     def get_deliminator(self):

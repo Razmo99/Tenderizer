@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # ! TODO Output Dir CSV Transaction Log
 
 class AppMenu(tk.Menu):
-
+    """ App menu bar """
     def __init__(self, master):
         tk.Menu.__init__(self,master)
         
@@ -39,12 +39,12 @@ class AppMenu(tk.Menu):
         regex_tester = app_tk_widgets.components.RegexTester(x)
 
 class App(ttk.Notebook):
-
+    """ Adds the main frames of tenderizer into a notebook """
     def __init__(self, master):
         ttk.Notebook.__init__(self, master)
         self.grid(sticky='nsew',padx=5,pady=5,ipady=5,ipadx=5)
         
-        # Contains all info on PDfs for the session
+        # Contains all Pdf information
         self.dataset=[]
 
         self.pdf_to_text=app_tk_widgets.frames.ConvertPdfToText(self)
@@ -58,8 +58,24 @@ def main():
     #destination=Path(os.getenv("DESTINATION",None))
     #pdftotext_exe=Path(os.getenv("PDFTOTEXT",None))
     root = tk.Tk()
+    s = ttk.Style()
+    
+    if root.getvar('tk_patchLevel')=='8.6.9' and os.name=='nt':
+        def fixed_map(option):
+            # Fix for setting text colour for Tkinter 8.6.9
+            # From: https://core.tcl.tk/tk/info/509cafafae
+            #
+            # Returns the style map for 'option' with any styles starting with
+            # ('!disabled', '!selected', ...) filtered out.
+            #
+            # style.map() returns an empty list for missing options, so this
+            # should be future-safe.
+            return [elm for elm in s.map('Treeview', query_opt=option) if elm[:2] != ('!disabled', '!selected')]
+        s.map('Treeview', foreground=fixed_map('foreground'), background=fixed_map('background'))
+
     app = App(root)
     menu = AppMenu(root)
+
     root.title('Tenderizer')
     root.protocol('WM_DELETE_WINDOW', root.quit)
     root.option_add('*tearOff', tk.FALSE)

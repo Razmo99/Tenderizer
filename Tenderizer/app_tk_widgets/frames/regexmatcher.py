@@ -48,10 +48,10 @@ class RegexMatcher(ttk.Frame):
         if dataset:
             self.treeview.tree.delete(*self.treeview.tree.get_children())
             for pdf in dataset:
-                if pdf.converted:                
+                if pdf.converted:
                     tv_new_name=self.search_re_expression(pdf)
                     if isinstance(tv_new_name,str):
-                        tv_new_name = pdf.new_name[:1024]                        
+                        tv_new_name = pdf.new_name[:1024]
                     tv_flags=self.set_pdf_color_flags(pdf)
                     self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,tv_new_name],tags=tv_flags)
             example=next(pdf.regex_matches for pdf in dataset if pdf.converted and pdf.regex_matches)
@@ -65,6 +65,8 @@ class RegexMatcher(ttk.Frame):
                 tv_args=('red')
             elif pdf.get_rename_path_len() > 256:
                 tv_args=('yellow')
+        else:
+            tv_args=('purple')
         return tv_args
 
     def get_compiled_re(self):

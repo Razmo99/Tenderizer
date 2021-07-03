@@ -33,6 +33,7 @@ class TreeView(ttk.LabelFrame):
         self.tree.tag_configure('red',background='red')
         self.tree.tag_configure('yellow',background='yellow')
         self.tree.tag_configure('green',background='green')
+        self.tree.tag_configure('purple',background='purple')
         # Scroll bar for tree view
         self.scrollbar = ttk.Scrollbar(self.tv_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=self.scrollbar.set)

@@ -17,20 +17,22 @@ class TreeView(ttk.LabelFrame):
 
     def __init__(self, master,lf_title,column):
         ttk.LabelFrame.__init__(self,master,text=lf_title)
-
         self.grid(sticky='nsew',pady=5,padx=5)
         self.grid_rowconfigure(1,weight=1)
         self.grid_columnconfigure(0,weight=1)
         # Hold the Treeview and scroll bar. Keeps them together
         self.tv_frame=ttk.Frame(self)
         self.tv_frame.grid(sticky='nsew',pady=5,padx=5,row=1,column=0,ipady=5,ipadx=5)
-        # Make the tree ciew have priority for screen resizing
+        # Make the tree view have priority for screen resizing
         self.tv_frame.grid_rowconfigure(0,weight=0)
         self.tv_frame.grid_rowconfigure(1,weight=1)
         self.tv_frame.grid_rowconfigure(2,weight=0)
         self.tv_frame.grid_columnconfigure(0,weight=1)
 
         self.tree = ttk.Treeview(self.tv_frame,columns=column,show='headings')
+        self.tree.tag_configure('red',background='red')
+        self.tree.tag_configure('yellow',background='yellow')
+        self.tree.tag_configure('green',background='green')
         # Scroll bar for tree view
         self.scrollbar = ttk.Scrollbar(self.tv_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=self.scrollbar.set)
@@ -84,19 +86,11 @@ class TreeView(ttk.LabelFrame):
             pass
 
     def delete_selection(self):
-        # list of pdf data classes
         dataset = self.master.dataset
-        # current selection in the tree view
         selection = self.tree.selection()
-        # Check the tree view has a data set
         if dataset:
-            # iterate over the current selection
             for iid in selection:
-                # iterate over the data set
                 for index,pdf in enumerate(dataset):
-                    # look for an ID match
                     if iid == pdf.id:
-                        # remove the item from the dataset
                         del dataset[index]
-        # Remove the selection from the tree view
         self.tree.delete(*self.tree.selection())

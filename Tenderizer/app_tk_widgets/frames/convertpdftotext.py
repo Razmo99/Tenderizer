@@ -70,9 +70,10 @@ class ConvertPdfToText(ttk.Frame):
             )
             if x == 0:
                 self.read_pdf_text(pdf, output_path)
+                self.treeview.tree.item(pdf.id,tags=('green'))
             else:
-                logging.debug(f'Failed to convert: {pdf.input_path.resolve()}')
                 pdf.converted=False
+                self.treeview.tree.item(pdf.id,tags=('red'))
     
     def read_pdf_text(self, pdf: Pdf, output_path: Path) -> None:
         """ Read generated txt from pdf doc add it to pdf object"""

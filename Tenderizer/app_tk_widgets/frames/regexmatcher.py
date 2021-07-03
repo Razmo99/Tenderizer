@@ -102,6 +102,11 @@ class RegexMatcher(ttk.Frame):
                     logging.exception(json.dumps(output))
                     self.treeview.tree.item(pdf.id,tags=('red'))
                     tk.messagebox.showerror("Error", f'Failed to find: {e.filename}')
+                except:
+                    output['completed']=False
+                    logging.exception(json.dumps(output))
+                    self.treeview.tree.item(pdf.id,tags=('red'))                    
+                    raise
                 else:
                     self.treeview.tree.item(pdf.id,tags=('green'))
                     logging.info(json.dumps(output))

@@ -26,6 +26,12 @@ class Pdf():
     def __repr__(self) -> str:
         return self.name
 
+    def get_rename_path(self) -> PurePath:
+        return self.input_dir / self.new_name
+
+    def get_rename_path_len(self) -> int:
+        return len(self.get_rename_path().__str__())
+
     def set_output_path(self,suffix='.txt') -> None:
         self.output_path=self.output_dir.joinpath(self.get_input_path_rel_dir()).with_suffix(suffix)
 

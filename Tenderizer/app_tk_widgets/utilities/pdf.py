@@ -14,9 +14,9 @@ class Pdf():
     text_data: str
     regex_matches: re.Match
     regex_match_group: int
-    new_name: str
     rename_op: tuple
     converted: bool = False
+    new_name: str = ''
 
     def __init__(self,input_path:PurePath,id='0') -> None:
         self.id=id

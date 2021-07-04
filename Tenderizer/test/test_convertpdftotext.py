@@ -76,6 +76,6 @@ class TestRegexEntry(TKinterTestCase):
         dataset_files=[i.output_path.name for i in covnert_pdftotext.dataset]
         output_files=[i.name for i in self.output_dir.iterdir()]
         self.assertEquals(dataset_files,output_files)
-        #self.remove_test_tmp_dir()
+        self.remove_test_tmp_dir()
 
         

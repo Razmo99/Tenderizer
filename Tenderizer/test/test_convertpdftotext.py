@@ -34,9 +34,9 @@ class TestRegexEntry(TKinterTestCase):
     def new_convertpdftotext(self):
         self.root.dataset=[]
         self.convertpdftotext=ConvertPdfToText(self.root)
-        self.convertpdftotext.input.path_entry.insert(tk.END,self.input_dir.resolve())
+        self.convertpdftotext.input.entry.insert(tk.END,self.input_dir.resolve())
         self.convertpdftotext.input.assert_dir()
-        self.convertpdftotext.output.path_entry.insert(tk.END,self.output_dir.resolve())
+        self.convertpdftotext.output.entry.insert(tk.END,self.output_dir.resolve())
         self.convertpdftotext.output.assert_dir()        
         self.pump_events()
         return self.convertpdftotext
@@ -64,7 +64,7 @@ class TestRegexEntry(TKinterTestCase):
     def test_convert_pdfs(self):
         self.new_tmp_dir()
         covnert_pdftotext=self.new_convertpdftotext()
-
+        
         self.assertEqual(covnert_pdftotext.get_load_state().string,tk.NORMAL)
         self.assertEqual(covnert_pdftotext.get_convert_state().string,tk.NORMAL)
 

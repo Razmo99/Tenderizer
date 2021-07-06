@@ -20,9 +20,9 @@ class BrowseDir(ttk.LabelFrame):
         self.grid_columnconfigure(0,weight=1)
         self.grid(sticky='new',pady=5,padx=5)
         # tk.Entry widget that displays the selected path and allows editing
-        self.path_entry = ttk.Entry(self,textvariable=self.dir)
-        self.path_entry.grid(column=0, row=0,sticky='we',padx=5,pady=5)
-        self.path_entry.bind('<KeyRelease>', self.assert_dir) 
+        self.entry = ttk.Entry(self,textvariable=self.dir)
+        self.entry.grid(column=0, row=0,sticky='we',padx=5,pady=5)
+        self.entry.bind('<KeyRelease>', self.assert_dir) 
         # Browse directory button
         self.button = ttk.Button(self,text='Browse',command=self.select_dir)
         self.button.grid(column=1, row=0,sticky='we',padx=5,pady=5)

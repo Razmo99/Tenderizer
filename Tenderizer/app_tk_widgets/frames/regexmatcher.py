@@ -38,12 +38,48 @@ class RegexMatcher(ttk.Frame):
         self.load_btn=self.treeview.load_button
 
         self.first_load=True
-        self.load_btn.configure(command=self.set_files_new_name,state=tk.NORMAL)
+        self.load_btn.configure(command=self.set_pdfs_new_name,state=tk.NORMAL)
         self.rename_btn.configure(command=self.rename_files,state=tk.DISABLED,text='Rename')
 
         self.treeview.right_click_selection_menu.add_command(label='Regex Utility',command=lambda :self.open_regex_util())
 
-    def set_files_new_name(self):
+    def set_pdfs_new_name(self, iter_obj=None):
+        """ Evaluates the dataset against the input re expression """
+        if self.dataset:
+            if not iter_obj:
+                self.disable_tv_btns()
+                iter_obj = iter(self.dataset)
+                self.treeview.tree.delete(*self.treeview.tree.get_children())
+            try:
+                pdf = next(iter_obj)
+            except StopIteration:
+                self.set_match_example()
+                self.enable_tv_btns()
+                return
+            else:
+                if pdf.converted:
+                    self.search_re_expression(pdf)
+                    tv_flags=self.set_pdf_color_flags(pdf)
+                    self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,pdf.new_name[:1024]],tags=tv_flags)
+                    self.after_idle(self.set_pdfs_new_name,iter_obj)
+
+    def disable_tv_btns(self):
+        self.load_btn.configure(state=tk.DISABLED)
+        self.rename_btn.configure(state=tk.DISABLED)
+
+    def enable_tv_btns(self):
+        self.load_btn.configure(state=tk.NORMAL)
+        self.rename_btn.configure(state=tk.NORMAL)
+
+    def set_match_example(self):
+            example=next(pdf.regex_matches for pdf in self.dataset if pdf.converted and pdf.regex_matches)
+            if example:
+                self.new_match_order_examples(example)
+            if self.first_load:
+                self.rename_btn.configure(state=tk.NORMAL)
+                self.first_load=False
+
+    def _set_pdfs_new_name(self):
         """ Evaluates the dataset against the input re expression """
         dataset=self.dataset
         if dataset:
@@ -58,7 +94,7 @@ class RegexMatcher(ttk.Frame):
                 self.new_match_order_examples(example)
             if self.first_load:
                 self.rename_btn.configure(state=tk.NORMAL)
-                self.first_load=False
+                self.first_load=False                
     
     def set_pdf_color_flags(self,pdf):
         tv_args=()

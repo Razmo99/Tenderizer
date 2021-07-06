@@ -60,24 +60,34 @@ class ConvertPdfToText(ttk.Frame):
         else:
             self.load_btn.configure(state=tk.DISABLED)
     
-    def convert_paths(self) -> None:
+    def convert_paths(self,iter_obj=None) -> None:
         """Convert PDF's to text"""
-        for pdf in self.dataset:
-            output_path=Path(pdf.output_path)
-            x=self.pdftotext.execute(
-                input_path=Path(pdf.input_path),
-                output=output_path
-            )
-            if x == 0:
-                self.read_pdf_text(pdf, output_path)
+        if not iter_obj:
+            iter_obj=iter(self.dataset)
+        try:
+            pdf=next(iter_obj)
+        except StopIteration:
+            return
+        else:
+            exit_code = self.convert_path(pdf)
+            if exit_code == 0:
+                self.read_pdf_text(pdf)
                 self.treeview.tree.item(pdf.id,tags=('green'))
+                self.treeview.tree.see(pdf.id)
             else:
                 pdf.converted=False
                 self.treeview.tree.item(pdf.id,tags=('red'))
-    
-    def read_pdf_text(self, pdf: Pdf, output_path: Path) -> None:
+            self.after_idle(self.convert_paths,iter_obj)
+
+    def convert_path(self, pdf):
+        return self.pdftotext.execute(
+                input_path=Path(pdf.input_path),
+                output=Path(pdf.output_path)
+            )
+  
+    def read_pdf_text(self, pdf: Pdf) -> None:
         """ Read generated txt from pdf doc add it to pdf object"""
-        with output_path.open('r') as p:
+        with Path(pdf.output_path).open('r') as p:
             txt=p.read()
             pdf.text_data=txt
         pdf.converted=True

@@ -37,6 +37,14 @@ class ConvertPdfToText(ttk.Frame):
         
         self.pdftotext=PDFToText(Path('xpdf/pdftotext.exe'))
     
+    def disable_tv_btns(self):
+        self.load_btn.configure(state=tk.DISABLED)
+        self.convert_btn.configure(state=tk.DISABLED)
+
+    def enable_tv_btns(self):
+        self.load_btn.configure(state=tk.NORMAL)
+        self.convert_btn.configure(state=tk.NORMAL)
+
     def get_load_state(self) -> str:
         state=self.load_btn.cget('state')
         return state
@@ -64,9 +72,11 @@ class ConvertPdfToText(ttk.Frame):
         """Convert PDF's to text"""
         if not iter_obj:
             iter_obj=iter(self.dataset)
+            self.disable_tv_btns()
         try:
             pdf=next(iter_obj)
         except StopIteration:
+            self.enable_tv_btns()
             return
         else:
             exit_code = self.convert_path(pdf)

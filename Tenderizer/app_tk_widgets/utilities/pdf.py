@@ -12,9 +12,9 @@ class Pdf():
     output_dir: PurePath
     id: str
     text_data: str
-    regex_matches: re.Match
     regex_match_group: int
-    rename_op: tuple
+    regex_matches: re.Match = None
+    rename_op: tuple = ()
     converted: bool = False
     new_name: str = ''
 

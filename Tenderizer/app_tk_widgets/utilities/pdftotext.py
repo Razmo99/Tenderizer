@@ -34,7 +34,14 @@ class PDFToText(object):
             )
             pdftotext.wait()
             if not pdftotext.returncode == 0:
-                logger.debug(pdftotext.returncode)
+                if pdftotext.returncode == 1:
+                    raise OpenPDFError(args)
+                elif pdftotext.returncode == 2:
+                    raise OpenOutputFileError(args)
+                elif pdftotext.returncode == 3:
+                    raise PDFPermissionsError(args)
+                elif pdftotext.returncode == 99:
+                    raise XPDFTools(args)                                        
             else:
                 dump={
                     'input_path': f'{input_path.resolve()}',
@@ -47,3 +54,34 @@ class PDFToText(object):
                     json.dumps(dump)
                 )
             return pdftotext.returncode
+
+class XPDFTools(Exception):
+    """ Basic exception for erros raised by xpdf tools """
+    def __init__(self, arguments,msg=None) -> None:
+        self.msg=msg if msg else 'Error with Xpdf Tools'
+        super(XPDFTools,self).__init__(self.msg)
+        self.arguments=arguments
+
+class OpenPDFError(XPDFTools):
+    """Error opening the PDF File"""
+    def __init__(self, arguments, msg=None):
+        super(OpenPDFError,self).__init__(
+            arguments,
+            'Error opening a PDF file'
+        )
+
+class OpenOutputFileError(XPDFTools):
+    """Error opening the PDF Output File"""
+    def __init__(self, arguments, msg=None):
+        super(OpenPDFError,self).__init__(
+            arguments,
+            'Error opening a PDF Output file'
+        )
+
+class PDFPermissionsError(XPDFTools):
+    """ PDF Permission Error"""
+    def __init__(self, arguments, msg=None):
+        super(OpenPDFError,self).__init__(
+            arguments,
+            'Error with PDF Permissions'
+        )                       

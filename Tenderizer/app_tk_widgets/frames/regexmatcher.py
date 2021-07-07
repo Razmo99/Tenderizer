@@ -39,7 +39,7 @@ class RegexMatcher(ttk.Frame):
 
         self.first_load=True
         self.load_btn.configure(command=self.set_pdfs_new_name,state=tk.NORMAL)
-        self.rename_btn.configure(command=self.rename_files,state=tk.DISABLED,text='Rename')
+        self.rename_btn.configure(command=self.rename_pdfs,state=tk.DISABLED,text='Rename')
 
         self.treeview.right_click_selection_menu.add_command(label='Regex Utility',command=lambda :self.open_regex_util())
 
@@ -111,7 +111,7 @@ class RegexMatcher(ttk.Frame):
         if  re_compiled_status == "" and re_compiled:
             return re_compiled
     
-    def search_re_expression(self, pdf):
+    def search_re_expression(self,pdf):
         if pdf.converted:
             # Check if the regex entry is valid and compiled
             compiled_regex=self.get_compiled_re()
@@ -128,41 +128,54 @@ class RegexMatcher(ttk.Frame):
                     else:
                         pdf.new_name=''
 
-    def rename_files(self):
+    def rename_pdfs(self,iter_obj=None):
         if self.dataset:
-            for pdf in self.dataset:
+            if not iter_obj:
+                iter_obj = iter(self.dataset)
+                self.disable_tv_btns()
+            try:                
+                pdf = next(iter_obj)
+            except StopIteration:
+                return
+            else:
                 if pdf.converted and pdf.new_name:
-                    input_path=Path(pdf.input_path)
-                    rename_path=Path(pdf.get_rename_path())
-                    output={
-                        'operation': 'rename',
-                        'input_path': f'{input_path.resolve()}',
-                        'rename_path': f'{rename_path.resolve()}',
-                        'completed': True
-                    }
-                    self.treeview.tree.item(pdf.id,tags=('green'))
-                    try:
-                        pdf.rename_op=(input_path,rename_path)
-                        input_path.rename(rename_path)
-                    except FileNotFoundError as e:
-                        output['completed']=False
-                        logging.exception(json.dumps(output))
-                        self.treeview.tree.item(pdf.id,tags=('red'))
-                        tk.messagebox.showerror("FileNotFoundError", e.__str__())
-                    except PermissionError as e:
-                        output['completed']=False
-                        logging.exception(json.dumps(output))
-                        self.treeview.tree.item(pdf.id,tags=('red'))
-                        tk.messagebox.showerror("PermissionError", e.__str__())
-                    except:
-                        output['completed']=False
-                        logging.exception(json.dumps(output))
-                        self.treeview.tree.item(pdf.id,tags=('red'))                    
-                        raise
-                    else:
+                    self.rename_pdf(pdf)
+                    if pdf.rename_op:
                         self.treeview.tree.item(pdf.id,tags=('green'))
-                        logging.info(json.dumps(output))
-            self.rename_btn.configure(state=tk.DISABLED)
+                    else:
+                        self.treeview.tree.item(pdf.id,tags=('red'))                    
+                self.after_idle(self.rename_pdfs,iter_obj)
+
+    def rename_pdf(self, pdf):
+        input_path=Path(pdf.input_path)
+        rename_path=Path(pdf.get_rename_path())
+        output={
+                    'operation': 'rename',
+                    'input_path': f'{input_path}',
+                    'rename_path': f'{rename_path}',
+                    'completed': False
+                }
+        try:
+            input_path.rename(rename_path)
+            pdf.rename_op=(input_path,rename_path)
+        except FileNotFoundError as e:
+            tk.messagebox.showerror("FileNotFoundError", e.__str__())
+        except PermissionError as e:
+            tk.messagebox.showerror("PermissionError", e.__str__())
+        except OSError as e:
+            if e.winerror == 123:
+                tk.messagebox.showerror("OSError", f'File path most likley too long.\n{e.__str__()[:1024]}...')
+            else:
+                tk.messagebox.showerror("Unhandled OSError", e.__str__())
+                raise
+        except Exception as e:
+            tk.messagebox.showerror("Unhandled Exception", e.__str__())
+            raise
+        else:
+            output['completed']=True
+            return 0
+        finally:         
+            logging.info(json.dumps(output))
     
     def open_regex_util(self):
         x=tk.Toplevel(self.master)

@@ -6,6 +6,7 @@ import os
 from pathlib import Path, PurePath
 from ..components import RegexEntry, TreeView, RegexMatchOrder,RegexTester, BrowseDir
 from .. utilities import Pdf, PDFToText
+from .. utilities.pdftotext import OpenOutputFileError, PDFPermissionsError, OpenPDFError
 
 class ConvertPdfToText(ttk.Frame):
 
@@ -90,10 +91,22 @@ class ConvertPdfToText(ttk.Frame):
             self.after_idle(self.convert_paths,iter_obj)
 
     def convert_path(self, pdf):
-        return self.pdftotext.execute(
-                input_path=Path(pdf.input_path),
-                output=Path(pdf.output_path)
-            )
+        try:
+            result =  self.pdftotext.execute(
+                    input_path=Path(pdf.input_path),
+                    output=Path(pdf.output_path)
+                )
+        except OpenPDFError as e:
+            tk.messagebox.showerror("OpenPDFError", e.__str__())
+        except OpenOutputFileError as e:
+            tk.messagebox.showerror("OpenOutputFileError", e.__str__())
+        except PDFPermissionsError as e:
+            tk.messagebox.showerror("PDFPermissionsError", e.__str__())
+        except Exception as e:
+            tk.messagebox.showerror("Unhandled Exception", e.__str__())
+            raise
+        else:
+            return result
   
     def read_pdf_text(self, pdf: Pdf) -> None:
         """ Read generated txt from pdf doc add it to pdf object"""

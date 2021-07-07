@@ -67,7 +67,7 @@ class OpenPDFError(XPDFTools):
     def __init__(self, arguments, msg=None):
         super(OpenPDFError,self).__init__(
             arguments,
-            'Error opening a PDF file'
+            f'Error opening a PDF file: "{arguments[1]}"'
         )
 
 class OpenOutputFileError(XPDFTools):
@@ -75,7 +75,7 @@ class OpenOutputFileError(XPDFTools):
     def __init__(self, arguments, msg=None):
         super(OpenPDFError,self).__init__(
             arguments,
-            'Error opening a PDF Output file'
+            f'Error opening a PDF Output file: "{arguments[2]}"'
         )
 
 class PDFPermissionsError(XPDFTools):
@@ -83,5 +83,5 @@ class PDFPermissionsError(XPDFTools):
     def __init__(self, arguments, msg=None):
         super(OpenPDFError,self).__init__(
             arguments,
-            'Error with PDF Permissions'
+            f'Error with PDF Permissions: "{arguments[1]}"'
         )                       

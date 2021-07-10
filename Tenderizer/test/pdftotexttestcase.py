@@ -14,7 +14,10 @@ class PDFToTextTestCase():
         self.output_dir=Path('.\\test_tmp\outptut')
         self.output_dir.mkdir(exist_ok=True,parents=True)
         self.copy_pdf()
-    
+
+    def get_outptut_pdfs(self):
+        return [i.name for i in self.input_dir.glob('*.pdf')]
+
     def copy_pdf(self):
         self.test_pdfs=Path('.\\test_pdfs')
         for src_file in self.test_pdfs.glob('*.pdf'):

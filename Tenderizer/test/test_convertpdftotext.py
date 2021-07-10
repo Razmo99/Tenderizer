@@ -1,16 +1,14 @@
 from app_tk_widgets import ConvertPdfToText
 from tkintertestcase import TKinterTestCase
-import re
+from pdftotexttestcase import PDFToTextTestCase
 import tkinter as tk
-import unittest
-import os
 import shutil
-from pathlib import Path, PurePath
+from pathlib import Path
 
 
 
 
-class TestRegexEntry(TKinterTestCase):
+class TestRegexEntry(TKinterTestCase,PDFToTextTestCase):
     """
     Goals of this class
 
@@ -40,26 +38,6 @@ class TestRegexEntry(TKinterTestCase):
         self.convertpdftotext.output.assert_dir()        
         self.pump_events()
         return self.convertpdftotext
-
-    def new_tmp_dir(self):
-        """ Make """
-        self.pdfs=[]
-        self.test_dir=Path('.\\test_tmp')
-        self.input_dir=Path('.\\test_tmp\input')
-        self.input_dir.mkdir(exist_ok=True,parents=True)
-        
-        self.output_dir=Path('.\\test_tmp\outptut')
-        self.output_dir.mkdir(exist_ok=True,parents=True)
-        self.copy_pdf()
-    
-    def copy_pdf(self):
-        self.test_pdfs=Path('.\\test_pdfs')
-        for src_file in self.test_pdfs.glob('*.pdf'):
-            self.pdfs.append(src_file.name)
-            shutil.copy(src_file,self.input_dir)
-    
-    def remove_test_tmp_dir(self):
-        shutil.rmtree(self.test_dir)
     
     def test_convert_pdfs(self):
         self.new_tmp_dir()
@@ -76,6 +54,19 @@ class TestRegexEntry(TKinterTestCase):
         dataset_files=[i.output_path.name for i in covnert_pdftotext.dataset]
         output_files=[i.name for i in self.output_dir.iterdir()]
         self.assertEquals(dataset_files,output_files)
+        self.remove_test_tmp_dir()
+
+    def test_delete_selection(self):
+        self.new_tmp_dir()
+        covnert_pdftotext=self.new_convertpdftotext()
+        covnert_pdftotext.import_pdfs()
+        self.pump_events()
+        self.assertEqual([i.name for i in covnert_pdftotext.dataset],self.pdfs)
+        del_pdf=covnert_pdftotext.dataset[0]
+        covnert_pdftotext.treeview.tree.selection_set(del_pdf.id)
+        self.pump_events()
+        covnert_pdftotext.treeview.delete_selection()
+        self.assertNotIn(del_pdf.id,[i.id for i in covnert_pdftotext.dataset])
         self.remove_test_tmp_dir()
 
         

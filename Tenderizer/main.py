@@ -86,11 +86,11 @@ def main():
 if __name__ == "__main__":
     load_dotenv()
     if getattr(sys,'frozen',False):
-        #Change the current working directory to be the parent of the main.py
+        #Change the current working directory to be the parent of main.py
         working_dir=pathlib.Path(sys._MEIPASS)
         os.chdir(working_dir)
     else:
-        #Change the current working directory to be the parent of the main.py
+        #Change the current working directory to be the parent of main.py
         working_dir=pathlib.Path(__file__).resolve().parent
         os.chdir(working_dir)
     if os.getenv('DEBUG','').lower() == "true":

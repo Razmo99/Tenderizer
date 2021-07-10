@@ -97,6 +97,7 @@ class ConvertPdfToText(ttk.Frame):
                 )
         except Exception as e:
             tk.messagebox.showerror("Unhandled Exception", e.__str__())
+            logging.exception(e)
             raise
         else:
             return result

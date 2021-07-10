@@ -158,18 +158,12 @@ class RegexMatcher(ttk.Frame):
         try:
             input_path.rename(rename_path)
             pdf.rename_op=(input_path,rename_path)
-        except FileNotFoundError as e:
-            tk.messagebox.showerror("FileNotFoundError", e.__str__())
-        except PermissionError as e:
-            tk.messagebox.showerror("PermissionError", e.__str__())
-        except OSError as e:
+        except Exception as e:
             if e.winerror == 123:
                 tk.messagebox.showerror("OSError", f'File path most likley too long.\n{e.__str__()[:1024]}...')
             else:
-                tk.messagebox.showerror("Unhandled OSError", e.__str__())
-                raise
-        except Exception as e:
-            tk.messagebox.showerror("Unhandled Exception", e.__str__())
+                tk.messagebox.showerror("Unhandled Exception", e.__str__())
+            logging.exception(e)
             raise
         else:
             output['completed']=True

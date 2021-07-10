@@ -7,6 +7,9 @@ from pathlib import Path, PurePath
 from ..components import RegexEntry, TreeView, RegexMatchOrder,RegexTester
 from ..utilities import FileNamer
 import re
+
+logger = logging.getLogger(__name__)
+
 class RegexMatcher(ttk.Frame):
 
     def __init__(self,master):
@@ -77,24 +80,7 @@ class RegexMatcher(ttk.Frame):
                 self.new_match_order_examples(example)
             if self.first_load:
                 self.rename_btn.configure(state=tk.NORMAL)
-                self.first_load=False
-
-    def _set_pdfs_new_name(self):
-        """ Evaluates the dataset against the input re expression """
-        dataset=self.dataset
-        if dataset:
-            self.treeview.tree.delete(*self.treeview.tree.get_children())
-            for pdf in dataset:
-                if pdf.converted:
-                    self.search_re_expression(pdf)
-                    tv_flags=self.set_pdf_color_flags(pdf)
-                    self.treeview.tree.insert('','end',iid=pdf.id,values=[pdf.name,pdf.new_name[:1024]],tags=tv_flags)
-            example=next(pdf.regex_matches for pdf in dataset if pdf.converted and pdf.regex_matches)
-            if example:
-                self.new_match_order_examples(example)
-            if self.first_load:
-                self.rename_btn.configure(state=tk.NORMAL)
-                self.first_load=False                
+                self.first_load=False               
     
     def set_pdf_color_flags(self,pdf):
         tv_args=()
@@ -159,17 +145,13 @@ class RegexMatcher(ttk.Frame):
             input_path.rename(rename_path)
             pdf.rename_op=(input_path,rename_path)
         except Exception as e:
-            if e.winerror == 123:
-                tk.messagebox.showerror("OSError", f'File path most likley too long.\n{e.__str__()[:1024]}...')
-            else:
-                tk.messagebox.showerror("Unhandled Exception", e.__str__())
-            logging.exception(e)
+            logger.error(e)
             raise
         else:
             output['completed']=True
             return 0
-        finally:         
-            logging.info(json.dumps(output))
+        finally:
+            logger.info(json.dumps(output))
     
     def open_regex_util(self):
         x=tk.Toplevel(self.master)

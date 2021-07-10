@@ -7,7 +7,7 @@ from pathlib import Path, PurePath
 from ..components import RegexEntry, TreeView, RegexMatchOrder,RegexTester, BrowseDir
 from .. utilities import Pdf, PDFToText
 from .. utilities.pdftotext import OpenOutputFileError, PDFPermissionsError, OpenPDFError
-
+logger = logging.getLogger(__name__)
 class ConvertPdfToText(ttk.Frame):
 
     def __init__(self, master):
@@ -96,8 +96,7 @@ class ConvertPdfToText(ttk.Frame):
                     output=Path(pdf.output_path)
                 )
         except Exception as e:
-            tk.messagebox.showerror("Unhandled Exception", e.__str__())
-            logging.exception(e)
+            logger.error(e)
             raise
         else:
             return result

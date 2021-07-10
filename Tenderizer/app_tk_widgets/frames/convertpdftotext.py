@@ -10,7 +10,6 @@ from .. utilities.pdftotext import OpenOutputFileError, PDFPermissionsError, Ope
 
 class ConvertPdfToText(ttk.Frame):
 
-
     def __init__(self, master):
         # Init the main Frame
         ttk.Frame.__init__(self,master)
@@ -92,16 +91,10 @@ class ConvertPdfToText(ttk.Frame):
 
     def convert_path(self, pdf):
         try:
-            result =  self.pdftotext.execute(
+            result = self.pdftotext.execute(
                     input_path=Path(pdf.input_path),
                     output=Path(pdf.output_path)
                 )
-        except OpenPDFError as e:
-            tk.messagebox.showerror("OpenPDFError", e.__str__())
-        except OpenOutputFileError as e:
-            tk.messagebox.showerror("OpenOutputFileError", e.__str__())
-        except PDFPermissionsError as e:
-            tk.messagebox.showerror("PDFPermissionsError", e.__str__())
         except Exception as e:
             tk.messagebox.showerror("Unhandled Exception", e.__str__())
             raise

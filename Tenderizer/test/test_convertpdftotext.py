@@ -1,4 +1,7 @@
+from logging import debug
+import logging
 from app_tk_widgets import ConvertPdfToText
+from app_tk_widgets.utilities.pdftotext import OpenPDFError
 from tkintertestcase import TKinterTestCase
 from pdftotexttestcase import PDFToTextTestCase
 import tkinter as tk
@@ -29,6 +32,14 @@ class TestRegexEntry(TKinterTestCase,PDFToTextTestCase):
     * Pdf
 
     """
+    def setUp(self):
+        super().setUp()
+        self.new_tmp_dir()
+
+    def tearDown(self):
+        super().tearDown()
+        self.remove_test_tmp_dir()
+    
     def new_convertpdftotext(self):
         self.root.dataset=[]
         self.convertpdftotext=ConvertPdfToText(self.root)
@@ -40,7 +51,6 @@ class TestRegexEntry(TKinterTestCase,PDFToTextTestCase):
         return self.convertpdftotext
     
     def test_convert_pdfs(self):
-        self.new_tmp_dir()
         covnert_pdftotext=self.new_convertpdftotext()
         
         self.assertEqual(covnert_pdftotext.get_load_state().string,tk.NORMAL)
@@ -54,10 +64,9 @@ class TestRegexEntry(TKinterTestCase,PDFToTextTestCase):
         dataset_files=[i.output_path.name for i in covnert_pdftotext.dataset]
         output_files=[i.name for i in self.output_dir.iterdir()]
         self.assertEquals(dataset_files,output_files)
-        self.remove_test_tmp_dir()
+        self.assertNotIn(False,[i.converted for i in covnert_pdftotext.dataset])
 
     def test_delete_selection(self):
-        self.new_tmp_dir()
         covnert_pdftotext=self.new_convertpdftotext()
         covnert_pdftotext.import_pdfs()
         self.pump_events()
@@ -67,6 +76,22 @@ class TestRegexEntry(TKinterTestCase,PDFToTextTestCase):
         self.pump_events()
         covnert_pdftotext.treeview.delete_selection()
         self.assertNotIn(del_pdf.id,[i.id for i in covnert_pdftotext.dataset])
-        self.remove_test_tmp_dir()
+
+    def test_except_halts_conversion__then_log_and_raise(self):
+        covnert_pdftotext=self.new_convertpdftotext()
+        covnert_pdftotext.import_pdfs()
+        self.pump_events()
+        self.assertEqual([i.name for i in covnert_pdftotext.dataset],self.pdfs)
+        del_pdf=Path(covnert_pdftotext.dataset[0].input_path)
+        
+        with self.assertLogs('app_tk_widgets.frames.convertpdftotext',level=logging.ERROR) as cm:
+            del_pdf.unlink()
+            with self.assertRaises(OpenPDFError):
+                covnert_pdftotext.convert_paths()
+            self.assertEqual(cm.output,[f'ERROR:app_tk_widgets.frames.convertpdftotext:Error opening a PDF file: "{del_pdf.resolve()}"'])
+        self.pump_events()
+        self.assertNotIn(True,[i.converted for i in covnert_pdftotext.dataset])
+
+
 
         

@@ -63,7 +63,7 @@ class TestRegexEntry(TKinterTestCase,PDFToTextTestCase):
     def refresh_dataset(self):
         if not getattr(self,'convertpdftotext',''):
             self.new_convertpdftotext()
-        return copy.deepcopy(self.masterdataset)
+        self.root.dataset = copy.deepcopy(self.masterdataset)
 
     def new_regexmatcher(self):
         self.regexmatcher=RegexMatcher(self.root)
@@ -95,7 +95,7 @@ class TestRegexEntry(TKinterTestCase,PDFToTextTestCase):
             regex_matcher.treeview.delete_selection()
             self.assertNotIn(del_pdf.id,[i.id for i in regex_matcher.dataset])
 
-    def test_new_file_name(self)        :
+    def test_new_file_name(self):
         self.refresh_dataset()
         regex_matcher=self.new_regexmatcher()
         regex_matcher.set_pdfs_new_name()

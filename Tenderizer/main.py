@@ -19,7 +19,6 @@ import app_tk_widgets
 from dotenv import load_dotenv
 from logger_colors import CustomFormatter
 
-logger = logging.getLogger(__name__)
 # ! TODO Dark Mode
 # ! TODO Output Dir CSV Transaction Log
 
@@ -119,19 +118,20 @@ if __name__ == "__main__":
         maxBytes=5*1024*1024,
         backupCount=2,
         encoding='utf-8',
-        delay=0
+        delay=0,
     )
-    rfh.setFormatter(CustomFormatter)
+    rfh.setFormatter(CustomFormatter())
     console = logging.StreamHandler()
     console.setLevel(LoggingLevel)
-    console.setFormatter(CustomFormatter)
+    console.setFormatter(CustomFormatter())
     logging.basicConfig(
         level=LoggingLevel,
         format=logging_format,
         handlers=[rfh, console]
     )
-    logger.info(f'Working Dir: {str(working_dir)}')
+    logger = logging.getLogger(__name__)
+    logger.info(f"Working Dir: {str(working_dir)}")
     logger.info(
-        f'Logging Level: {logging.getLevelName(logger.getEffectiveLevel())}')
-    logger.info(f'Tenderizer version: {__version__}')
+        f"Logging Level: {logging.getLevelName(logger.getEffectiveLevel())}")
+    logger.info(f"Tenderizer version: {__version__}")
     main()

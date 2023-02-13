@@ -2,10 +2,11 @@
 
 """Basic regular expression demonstration facility (Perl style syntax)."""
 
+import re
 import tkinter as tk
 import tkinter.ttk as ttk
-import re
 from typing import Text
+
 
 class RegexTester:
 
@@ -13,7 +14,7 @@ class RegexTester:
         self.master = master
 
         self.promptdisplay = ttk.Label(self.master, anchor=tk.W,
-                text="Enter a Perl-style regular expression:")
+                                       text="Enter a Perl-style regular expression:")
         self.promptdisplay.pack(side=tk.TOP, fill=tk.X)
 
         self.regexdisplay = ttk.Entry(self.master)
@@ -26,8 +27,8 @@ class RegexTester:
         self.statusdisplay.pack(side=tk.TOP, fill=tk.X)
 
         # Holds the Text display and its scroll bar
-        self.textdisplay_frame=ttk.LabelFrame(self.master,text='Enter a string to search')
-        self.textdisplay_frame.pack(fill=tk.BOTH,expand=1)
+        self.textdisplay_frame = ttk.LabelFrame(self.master, text='Enter a string to search')
+        self.textdisplay_frame.pack(fill=tk.BOTH, expand=1)
 
         self.showframe = ttk.Frame(self.textdisplay_frame)
         self.showframe.pack(fill=tk.X, anchor=tk.W)
@@ -35,36 +36,36 @@ class RegexTester:
         self.showvar = tk.StringVar(master)
         self.showvar.set("first")
         self.showfirstradio = ttk.Radiobutton(self.showframe,
-                                         text="Highlight first match",
-                                          variable=self.showvar,
-                                          value="first",
-                                          command=self.recompile)
+                                              text="Highlight first match",
+                                              variable=self.showvar,
+                                              value="first",
+                                              command=self.recompile)
         self.showfirstradio.pack(side=tk.LEFT)
 
         self.showallradio = ttk.Radiobutton(self.showframe,
-                                        text="Highlight all matches",
-                                        variable=self.showvar,
-                                        value="all",
-                                        command=self.recompile)
+                                            text="Highlight all matches",
+                                            variable=self.showvar,
+                                            value="all",
+                                            command=self.recompile)
         self.showallradio.pack(side=tk.LEFT)
         # Text Display to enter in match data
         self.stringdisplay = tk.Text(self.textdisplay_frame, width=60, height=4)
-        self.stringdisplay.pack(fill=tk.BOTH, expand=1,side=tk.LEFT)
+        self.stringdisplay.pack(fill=tk.BOTH, expand=1, side=tk.LEFT)
         self.stringdisplay.tag_configure("hit", background="yellow")
         # Scroll bar for the text display
         self.text_scrollbar = ttk.Scrollbar(self.textdisplay_frame, orient=tk.VERTICAL, command=self.stringdisplay.yview)
         self.text_scrollbar.pack(fill=tk.BOTH, side=tk.LEFT)
         self.stringdisplay.configure(yscroll=self.text_scrollbar.set)
         # Holds the regex match groups and its scroll bar
-        self.grouplist_frame=ttk.LabelFrame(self.master,text='Groups:')
-        self.grouplist_frame.pack(fill=tk.BOTH,expand=1)
+        self.grouplist_frame = ttk.LabelFrame(self.master, text='Groups:')
+        self.grouplist_frame.pack(fill=tk.BOTH, expand=1)
         # Holds all re match groups
         self.grouplist = tk.Listbox(self.grouplist_frame)
-        self.grouplist.pack(expand=1, fill=tk.BOTH,side=tk.LEFT)
-        
+        self.grouplist.pack(expand=1, fill=tk.BOTH, side=tk.LEFT)
+
         self.grouplist_scrollbar = ttk.Scrollbar(self.grouplist_frame, orient=tk.VERTICAL, command=self.grouplist.yview)
         self.grouplist_scrollbar.pack(fill=tk.BOTH, side=tk.LEFT)
-        self.grouplist.configure(yscroll=self.grouplist_scrollbar.set)        
+        self.grouplist.configure(yscroll=self.grouplist_scrollbar.set)
 
         self.regexdisplay.bind('<Key>', self.recompile)
         self.stringdisplay.bind('<Key>', self.reevaluate)
@@ -77,7 +78,7 @@ class RegexTester:
 
         btags = self.stringdisplay.bindtags()
         self.stringdisplay.bindtags(btags[1:] + btags[:1])
-    
+
     def addoptions(self):
         self.frames = []
         self.boxes = []
@@ -93,9 +94,9 @@ class RegexTester:
             val = getattr(re, name).value
             var = tk.IntVar()
             box = ttk.Checkbutton(frame,
-                    variable=var, text=name,
-                    offvalue=0, onvalue=val,
-                    command=self.recompile)
+                                  variable=var, text=name,
+                                  offvalue=0, onvalue=val,
+                                  command=self.recompile)
             box.pack(side=tk.LEFT)
             self.boxes.append(box)
             self.vars.append(var)
@@ -112,11 +113,11 @@ class RegexTester:
                                        self.getflags())
             bg = self.promptdisplay['background']
             self.statusdisplay.config(text="", background=bg)
-        except re.error as msg: 
+        except re.error as msg:
             self.compiled = None
             self.statusdisplay.config(
-                    text="re.error: %s" % str(msg),
-                    background="red")
+                text="re.error: %s" % str(msg),
+                background="red")
         self.reevaluate()
 
     def reevaluate(self, event=None):
@@ -174,6 +175,7 @@ def main():
     demo = RegexTester(root)
     root.protocol('WM_DELETE_WINDOW', root.quit)
     root.mainloop()
+
 
 if __name__ == '__main__':
     main()

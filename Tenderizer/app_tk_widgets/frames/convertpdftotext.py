@@ -24,14 +24,17 @@ class ConvertPdfToText(ttk.Frame):
         self.grid_columnconfigure(0, weight=1)
         # Input directory or file to convert
         self.input = BrowseDir(self, 'Input Path')
-        self.input.error_msg.trace_add(('write'), self.callback_treeview_load_button)
+        self.input.error_msg.trace_add(
+            ('write'), self.callback_treeview_load_button)
         self.input.grid(row=0, column=0)
         # Output directory to store converted txt files
         self.output = BrowseDir(self, 'Output Path')
-        self.output.error_msg.trace_add(('write'), self.callback_treeview_convert_button)
+        self.output.error_msg.trace_add(
+            ('write'), self.callback_treeview_convert_button)
         self.output.grid(row=1, column=0)
         # Tree view to display the loaded PDF's
-        self.treeview = TreeView(self, 'PDF View', ('Name', 'Input Path', 'Output Path',))
+        self.treeview = TreeView(
+            self, 'PDF View', ('Name', 'Input Path', 'Output Path',))
         self.treeview.grid(row=2, column=0)
         # Configure the buttons in the treeview class
         self.load_btn = self.treeview.load_button

@@ -4,8 +4,9 @@ from .tkintertestcase import TKinterTestCase
 import tkinter as tk
 import unittest
 
+
 class TestBrowseDir(TKinterTestCase):
-    
+
     """
     Goals of this class
 
@@ -23,18 +24,14 @@ class TestBrowseDir(TKinterTestCase):
     """
 
     def test_assert_dir(self):
-        browse_dir = BrowseDir(self.root,'Input Directory')
+        browse_dir = BrowseDir(self.root, 'Input Directory')
         self.pump_events()
         browse_dir.entry.focus_set()
-        browse_dir.entry.insert(tk.END,r'\\')
+        browse_dir.entry.insert(tk.END, r'\\')
         browse_dir.assert_dir()
         self.pump_events()
-        self.assertEqual(browse_dir.error_msg.get(),'')
-        browse_dir.entry.insert(tk.END,r'/\\,><')
+        self.assertEqual(browse_dir.error_msg.get(), '')
+        browse_dir.entry.insert(tk.END, r'/\\,><')
         browse_dir.assert_dir()
         self.pump_events()
-        self.assertNotEqual(browse_dir.error_msg.get(),'')
-        
-
-
-
+        self.assertNotEqual(browse_dir.error_msg.get(), '')

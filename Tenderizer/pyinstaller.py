@@ -13,5 +13,5 @@ if __name__ == '__main__':
         'Tenderizer',
         '--version-file',
         'version.rc',
-        '--add-data=./xpdf/*;./xpdf'        
+        '--add-data=./xpdf/*;./xpdf'
     ])

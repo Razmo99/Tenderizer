@@ -3,13 +3,15 @@ import _tkinter as _tk
 import tkinter.ttk as ttk
 import unittest
 
+
 class TKinterTestCase(unittest.TestCase):
-    #Source https://stackoverflow.com/questions/4083796/how-do-i-run-unittest-on-a-tkinter-app
+    # Source https://stackoverflow.com/questions/4083796/how-do-i-run-unittest-on-a-tkinter-app
     """These methods are going to be the same for every GUI test,
     so refactored them into a separate class
     """
+
     def setUp(self):
-        self.root=tk.Tk()
+        self.root = tk.Tk()
         self.pump_events()
 
     def tearDown(self):

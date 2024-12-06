@@ -29,7 +29,8 @@ class BrowseDir(ttk.LabelFrame):
         self.button = ttk.Button(self, text='Browse', command=self.select_dir)
         self.button.grid(column=1, row=0, sticky='we', padx=5, pady=5)
         # Error message only displayed  when validation fails
-        self.error_label = ttk.Label(self, textvariable=self.error_msg, foreground='red')
+        self.error_label = ttk.Label(
+            self, textvariable=self.error_msg, foreground='red')
         self.error_label.grid(column=0, row=1, sticky='we', padx=5)
         self.error_label.grid_remove()
         self.assert_dir()
@@ -38,9 +39,11 @@ class BrowseDir(ttk.LabelFrame):
         """ Allows the user to select a directory """
         path = Path(self.dir.get())
         if path.exists() and path.is_dir():
-            filename = tk.filedialog.askdirectory(initialdir=path, title=f'Select a {self.title}')
+            filename = tk.filedialog.askdirectory(
+                initialdir=path, title=f'Select a {self.title}')
         else:
-            filename = tk.filedialog.askdirectory(initialdir='.', title=f'Select a {self.title}')
+            filename = tk.filedialog.askdirectory(
+                initialdir='.', title=f'Select a {self.title}')
         if filename != path and filename != '':
             self.dir.set(PurePath(filename))
             self.assert_dir()

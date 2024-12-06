@@ -4,6 +4,7 @@ from .tkintertestcase import TKinterTestCase
 import tkinter as tk
 import unittest
 
+
 class TestRegexEntry(TKinterTestCase):
     """
     Goals of this class
@@ -22,18 +23,12 @@ class TestRegexEntry(TKinterTestCase):
         regex = RegexEntry(self.root)
         self.pump_events()
         regex.entry.focus_set()
-        regex.entry.insert(tk.END,'(')
+        regex.entry.insert(tk.END, '(')
         regex.recompile()
         self.pump_events()
-        self.assertNotEqual(regex.statusdisplay.cget('text'),'')
-        regex.entry.insert(tk.END,')')
+        self.assertNotEqual(regex.statusdisplay.cget('text'), '')
+        regex.entry.insert(tk.END, ')')
         regex.recompile()
         self.pump_events()
-        self.assertEqual(regex.statusdisplay.cget('text'),'')
-        self.assertNotEqual(regex.compiled,None)
-
-
-
-
-
-
+        self.assertEqual(regex.statusdisplay.cget('text'), '')
+        self.assertNotEqual(regex.compiled, None)

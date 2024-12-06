@@ -31,7 +31,8 @@ class RegexMatcher(ttk.Frame):
             re.compile(r'(\-|\_|\ |\.)+', flags=re.S | re.M),
             re.compile(r'[\/\\\|\<\>\?\"\*\:\,]+', flags=re.S | re.M))
 
-        self.match_group_selector = RegexMatchOrder(self.regex_entry, self.file_namer)
+        self.match_group_selector = RegexMatchOrder(
+            self.regex_entry, self.file_namer)
         self.match_group_selector.grid(sticky='nsew', row=6, column=0)
         self.new_match_ordered_name = self.file_namer.new_file_name
         self.new_match_order_examples = self.match_group_selector.add_tree_view_items
@@ -43,10 +44,13 @@ class RegexMatcher(ttk.Frame):
         self.load_btn = self.treeview.load_button
 
         self.first_load = True
-        self.load_btn.configure(command=self.set_pdfs_new_name, state=tk.NORMAL)
-        self.rename_btn.configure(command=self.rename_pdfs, state=tk.DISABLED, text='Rename')
+        self.load_btn.configure(
+            command=self.set_pdfs_new_name, state=tk.NORMAL)
+        self.rename_btn.configure(
+            command=self.rename_pdfs, state=tk.DISABLED, text='Rename')
 
-        self.treeview.right_click_selection_menu.add_command(label='Regex Utility', command=lambda: self.open_regex_util())
+        self.treeview.right_click_selection_menu.add_command(
+            label='Regex Utility', command=lambda: self.open_regex_util())
 
     def set_pdfs_new_name(self, iter_obj=None):
         """ Evaluates the dataset against the input re expression """
@@ -65,7 +69,8 @@ class RegexMatcher(ttk.Frame):
                 if pdf.converted:
                     self.search_re_expression(pdf)
                     tv_flags = self.set_pdf_color_flags(pdf)
-                    self.treeview.tree.insert('', 'end', iid=pdf.id, values=[pdf.name, pdf.new_name[:1024]], tags=tv_flags)
+                    self.treeview.tree.insert('', 'end', iid=pdf.id, values=[
+                                              pdf.name, pdf.new_name[:1024]], tags=tv_flags)
                     self.after_idle(self.set_pdfs_new_name, iter_obj)
 
     def disable_tv_btns(self):
@@ -77,7 +82,8 @@ class RegexMatcher(ttk.Frame):
         self.rename_btn.configure(state=tk.NORMAL)
 
     def set_match_example(self):
-        example = next(pdf.regex_matches for pdf in self.dataset if pdf.converted and pdf.regex_matches)
+        example = next(
+            pdf.regex_matches for pdf in self.dataset if pdf.converted and pdf.regex_matches)
         if example:
             self.new_match_order_examples(example)
         if self.first_load:
@@ -109,7 +115,8 @@ class RegexMatcher(ttk.Frame):
                     pdf.regex_matches = re_match
                     suffix = pdf.input_path.suffix
                     prefix = pdf.name.replace(suffix, '')
-                    new_file_name = self.new_match_ordered_name(prefix, suffix, re_match)
+                    new_file_name = self.new_match_ordered_name(
+                        prefix, suffix, re_match)
                     if new_file_name:
                         pdf.new_name = new_file_name
                         return new_file_name

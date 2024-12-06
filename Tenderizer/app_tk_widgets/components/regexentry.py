@@ -25,7 +25,8 @@ class RegexEntry(ttk.Labelframe):
     def new_status_display_label(self):
         """ Displays any re compile errors """
         self.statusdisplay = ttk.Label(self, text='')
-        self.statusdisplay.grid(sticky='nwe', pady=5, padx=5, row=0, column=0, ipadx=5, ipady=5)
+        self.statusdisplay.grid(sticky='nwe', pady=5,
+                                padx=5, row=0, column=0, ipadx=5, ipady=5)
         self.bg = self.statusdisplay['background']
 
     def new_re_entry(self):

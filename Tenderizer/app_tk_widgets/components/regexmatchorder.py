@@ -46,23 +46,27 @@ class RegexMatchOrder(ttk.Labelframe):
 
         # Displays an example of what the selection will look like
         self.preview_label_var = tk.StringVar(self)
-        self.preview_label = ttk.Label(self.details_frame, textvariable=self.preview_label_var, wraplength=300, justify=tk.LEFT)
+        self.preview_label = ttk.Label(
+            self.details_frame, textvariable=self.preview_label_var, wraplength=300, justify=tk.LEFT)
         self.preview_label.grid(sticky='nwe', pady=5, padx=5, row=3, column=0)
         self.preview_label_var.set('Nothing to display yet.')
 
     def new_tree_view(self):
         """ Create treeview with columns and headers"""
-        self.tree = ttk.Treeview(self.tv_frame, columns=['ID', 'Example Value'], show='headings')
+        self.tree = ttk.Treeview(self.tv_frame, columns=[
+                                 'ID', 'Example Value'], show='headings')
 
         self.tree.column('ID', stretch=tk.NO, width=50)
         self.tree.heading('ID', text='ID', anchor=tk.CENTER)
         self.tree.column('Example Value', stretch=tk.YES)
-        self.tree.heading('Example Value', text='Example Value', anchor=tk.CENTER)
+        self.tree.heading(
+            'Example Value', text='Example Value', anchor=tk.CENTER)
         self.tree.grid(row=0, column=0, sticky='nsew')
 
     def new_tree_view_scrollbar(self):
         """Scroll bar for tree view"""
-        self.scrollbar = ttk.Scrollbar(self.tv_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.scrollbar = ttk.Scrollbar(
+            self.tv_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=self.scrollbar.set)
         self.scrollbar.grid(row=0, column=1, sticky='nsew')
 
@@ -75,7 +79,8 @@ class RegexMatchOrder(ttk.Labelframe):
         # Hold the re match selection string
         self.var = tk.StringVar(self)
         # Entry widget to type the re match selection into
-        self.entry = ttk.Entry(self.details_frame, textvariable=self.var, width=25, foreground='grey')
+        self.entry = ttk.Entry(
+            self.details_frame, textvariable=self.var, width=25, foreground='grey')
         self.entry.grid(sticky='nw', pady=5, padx=5, row=1, column=0)
         self.entry.insert(0, '1,2')
         self.entry.bind('<FocusIn>', self.remove_entry_tip)
@@ -83,8 +88,10 @@ class RegexMatchOrder(ttk.Labelframe):
 
     def new_deliminator_option_menu(self):
         """Spinbox that lets the user select the regex match deliminator"""
-        self.option_menu_label = ttk.Label(self.deliminator_frame, text='Deliminator:')
-        self.option_menu_label.grid(row=0, column=0, sticky="nw", padx=5, pady=5)
+        self.option_menu_label = ttk.Label(
+            self.deliminator_frame, text='Deliminator:')
+        self.option_menu_label.grid(
+            row=0, column=0, sticky="nw", padx=5, pady=5)
 
         self.option_menu_var = tk.StringVar()
         self.option_menu = ttk.OptionMenu(self.deliminator_frame,
@@ -110,7 +117,8 @@ class RegexMatchOrder(ttk.Labelframe):
     def new_tree_view_frame(self):
         """" Holds the Treeview and scroll bar"""
         self.tv_frame = ttk.LabelFrame(self, text='Available RE Match Groups')
-        self.tv_frame.grid(sticky='nsew', pady=5, padx=5, row=0, column=0, ipadx=5, ipady=5)
+        self.tv_frame.grid(sticky='nsew', pady=5, padx=5,
+                           row=0, column=0, ipadx=5, ipady=5)
         # Make the tree view have priority for screen resizing
         self.tv_frame.grid_rowconfigure(0, weight=1)
         self.tv_frame.grid_columnconfigure(0, weight=1)
@@ -142,7 +150,8 @@ class RegexMatchOrder(ttk.Labelframe):
             del self.selection_preview[-1]
             self.filenamer.deliminator = self.get_deliminator()
             self.filenamer.match_order = self.match_order
-            preview_text = ''.join(self.filenamer.set_match_deliminator(self.selection_preview))
+            preview_text = ''.join(
+                self.filenamer.set_match_deliminator(self.selection_preview))
 
             if len(preview_text) > 1024:
                 self.preview_label.configure(foreground='red')
@@ -166,7 +175,8 @@ class RegexMatchOrder(ttk.Labelframe):
     def get_deliminator(self):
         """ return the selected deliminator or 
         returns the first deliminator in the available options if no option is choosen yet """
-        current_selection = self.deliminator_options.get(self.option_menu_var.get())
+        current_selection = self.deliminator_options.get(
+            self.option_menu_var.get())
         if current_selection:
             return current_selection
         else:

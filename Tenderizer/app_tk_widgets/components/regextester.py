@@ -27,7 +27,8 @@ class RegexTester:
         self.statusdisplay.pack(side=tk.TOP, fill=tk.X)
 
         # Holds the Text display and its scroll bar
-        self.textdisplay_frame = ttk.LabelFrame(self.master, text='Enter a string to search')
+        self.textdisplay_frame = ttk.LabelFrame(
+            self.master, text='Enter a string to search')
         self.textdisplay_frame.pack(fill=tk.BOTH, expand=1)
 
         self.showframe = ttk.Frame(self.textdisplay_frame)
@@ -49,11 +50,13 @@ class RegexTester:
                                             command=self.recompile)
         self.showallradio.pack(side=tk.LEFT)
         # Text Display to enter in match data
-        self.stringdisplay = tk.Text(self.textdisplay_frame, width=60, height=4)
+        self.stringdisplay = tk.Text(
+            self.textdisplay_frame, width=60, height=4)
         self.stringdisplay.pack(fill=tk.BOTH, expand=1, side=tk.LEFT)
         self.stringdisplay.tag_configure("hit", background="yellow")
         # Scroll bar for the text display
-        self.text_scrollbar = ttk.Scrollbar(self.textdisplay_frame, orient=tk.VERTICAL, command=self.stringdisplay.yview)
+        self.text_scrollbar = ttk.Scrollbar(
+            self.textdisplay_frame, orient=tk.VERTICAL, command=self.stringdisplay.yview)
         self.text_scrollbar.pack(fill=tk.BOTH, side=tk.LEFT)
         self.stringdisplay.configure(yscroll=self.text_scrollbar.set)
         # Holds the regex match groups and its scroll bar
@@ -63,7 +66,8 @@ class RegexTester:
         self.grouplist = tk.Listbox(self.grouplist_frame)
         self.grouplist.pack(expand=1, fill=tk.BOTH, side=tk.LEFT)
 
-        self.grouplist_scrollbar = ttk.Scrollbar(self.grouplist_frame, orient=tk.VERTICAL, command=self.grouplist.yview)
+        self.grouplist_scrollbar = ttk.Scrollbar(
+            self.grouplist_frame, orient=tk.VERTICAL, command=self.grouplist.yview)
         self.grouplist_scrollbar.pack(fill=tk.BOTH, side=tk.LEFT)
         self.grouplist.configure(yscroll=self.grouplist_scrollbar.set)
 

@@ -30,7 +30,8 @@ class FileNamer():
         results = string_array.copy()
         for index, string in enumerate(results):
             s = string.strip() if len(string) > 1 else string
-            results[index] = re.sub(self.de_dup_regexp, self.deliminator, self.remove_newline(s))
+            results[index] = re.sub(
+                self.de_dup_regexp, self.deliminator, self.remove_newline(s))
         return results
 
     def new_file_name(self, prefix, suffix, matches):

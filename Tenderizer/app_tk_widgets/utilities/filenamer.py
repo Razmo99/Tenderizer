@@ -20,7 +20,8 @@ class FileNamer():
 
     def remove_newline(self, string):
         """ Removes newline chars \n \r \r\n """
-        return re.sub(self.newline_regexp, '', string)
+        if None is not string:
+            return re.sub(self.newline_regexp, '', string)
 
     def set_match_deliminator(self, string_array):
         """ Takes in an array of strings,
@@ -29,9 +30,10 @@ class FileNamer():
         """
         results = string_array.copy()
         for index, string in enumerate(results):
-            s = string.strip() if len(string) > 1 else string
-            results[index] = re.sub(
-                self.de_dup_regexp, self.deliminator, self.remove_newline(s))
+            if string is not None:
+                s = string.strip() if len(string) > 1 else string
+                results[index] = re.sub(
+                    self.de_dup_regexp, self.deliminator, self.remove_newline(s))
         return results
 
     def new_file_name(self, prefix, suffix, matches):

@@ -128,8 +128,9 @@ class RegexMatchOrder(ttk.Labelframe):
         self.tree.delete(*self.tree.get_children())
         for index, group in enumerate(match.groups(), start=1):
             example_value = self.filenamer.remove_newline(group)
-            tv_values = [index, example_value.strip()]
-            self.tree.insert('', 'end', iid=index, values=tv_values)
+            if None is not example_value:
+                tv_values = [index, example_value.strip()]
+                self.tree.insert('', 'end', iid=index, values=tv_values)
         self.compare_user_input
 
     def compare_user_input(self, event=None):

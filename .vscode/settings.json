@@ -2,10 +2,11 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "./Tenderizer",
+        "${workspaceFolder}//Tenderizer",
         "-p",
         "test_*.py"
     ],
+    "python.testing.cwd": "${workspaceFolder}/Tenderizer",
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
     "editor.formatOnSave": true,

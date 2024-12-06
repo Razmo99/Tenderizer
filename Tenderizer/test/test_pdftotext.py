@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Text
 from app_tk_widgets import PDFToText
 from app_tk_widgets.utilities.pdftotext import OpenPDFError,OpenOutputFileError
-from pdftotexttestcase import PDFToTextTestCase
+from .pdftotexttestcase import PDFToTextTestCase
 import unittest
 class TestFileNamer(unittest.TestCase,PDFToTextTestCase):
 
@@ -54,7 +54,7 @@ class TestFileNamer(unittest.TestCase,PDFToTextTestCase):
             self.assertIn('Drawing',data.read())
 
     def test_make_output_dir(self):
-        txt=self.output_dir / 'testing\SB.3.txt'
+        txt=self.output_dir / 'testing/SB.3.txt'
         pdf=self.input_dir / 'SB.3.pdf'
         self.pdftotext.execute(pdf,txt)
         self.assertEqual(txt.is_file(),True)

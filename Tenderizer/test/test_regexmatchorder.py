@@ -1,5 +1,5 @@
 from app_tk_widgets import RegexMatchOrder
-from tkintertestcase import TKinterTestCase
+from .tkintertestcase import TKinterTestCase
 import re
 import tkinter as tk
 import unittest

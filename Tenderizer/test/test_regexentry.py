@@ -1,5 +1,5 @@
 from app_tk_widgets import RegexEntry
-from tkintertestcase import TKinterTestCase
+from .tkintertestcase import TKinterTestCase
 
 import tkinter as tk
 import unittest

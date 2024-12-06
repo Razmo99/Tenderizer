@@ -2,8 +2,8 @@ from logging import debug
 import logging
 from app_tk_widgets import ConvertPdfToText
 from app_tk_widgets.utilities.pdftotext import OpenPDFError
-from tkintertestcase import TKinterTestCase
-from pdftotexttestcase import PDFToTextTestCase
+from .tkintertestcase import TKinterTestCase
+from .pdftotexttestcase import PDFToTextTestCase
 import tkinter as tk
 import shutil
 from pathlib import Path

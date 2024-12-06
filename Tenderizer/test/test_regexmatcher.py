@@ -1,8 +1,8 @@
 import re
 import logging
 from app_tk_widgets import RegexMatcher, ConvertPdfToText
-from tkintertestcase import TKinterTestCase
-from pdftotexttestcase import PDFToTextTestCase
+from .tkintertestcase import TKinterTestCase
+from .pdftotexttestcase import PDFToTextTestCase
 import tkinter as tk
 import shutil
 from pathlib import Path

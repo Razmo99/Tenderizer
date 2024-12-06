@@ -87,6 +87,13 @@ def main():
     app = App(root)
     menu = AppMenu(root)
 
+    if os.getenv('DEBUG', '').lower() == "true" and os.getenv('INPUT') or os.getenv('OUTPUT'):
+        app.pdf_to_text.input.entry.insert(tk.END, os.getenv('INPUT'))
+        app.pdf_to_text.input.assert_dir()
+
+        app.pdf_to_text.output.entry.insert(tk.END, os.getenv('OUTPUT'))
+        app.pdf_to_text.output.assert_dir()
+
     root.title('Tenderizer')
     root.protocol('WM_DELETE_WINDOW', root.quit)
     root.option_add('*tearOff', tk.FALSE)

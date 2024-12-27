@@ -123,7 +123,7 @@ class RegexMatchOrder(ttk.Labelframe):
         self.tv_frame.grid_rowconfigure(0, weight=1)
         self.tv_frame.grid_columnconfigure(0, weight=1)
 
-    def add_tree_view_items(self, match):
+    def add_tree_view_items(self, match:re.match) -> None:
         """ Adds items to the tree view  """
         self.tree.delete(*self.tree.get_children())
         for index, group in enumerate(match.groups(), start=1):
@@ -131,7 +131,12 @@ class RegexMatchOrder(ttk.Labelframe):
             if None is not example_value:
                 tv_values = [index, example_value.strip()]
                 self.tree.insert('', 'end', iid=index, values=tv_values)
-        self.compare_user_input
+        for key, value in match.groupdict().items():
+            example_value = self.filenamer.remove_newline(value)
+            if None is not example_value:
+                tv_values = [key,example_value.strip()]
+                self.tree.insert('','end',iid=key,values=tv_values)
+        self.compare_user_input()
 
     def compare_user_input(self, event=None):
         """ Compare user input against the tree view
@@ -168,7 +173,7 @@ class RegexMatchOrder(ttk.Labelframe):
         tv_ids = self.tree.get_children()
         for selection in selections:
             if selection in tv_ids:
-                self.match_order.append(int(selection))
+                self.match_order.append(selection)
                 tv_values = self.tree.set(selection)
                 self.selection_preview.append(tv_values['Example Value'][:512])
                 self.selection_preview.append(self.get_deliminator())

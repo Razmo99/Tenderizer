@@ -55,10 +55,16 @@ class FileNamer():
         results = []
         for match_id in self.match_order:
             try:
+                match_id = int(match_id)
+            except ValueError:
+                logger.debug(f'Failed to convert: {match_id} to int is probably a named match group')
+            
+            try:
                 match = matches.group(match_id)
             except IndexError:
-                logger.debug(f'Failed to find match order:{match_id}')
+                logger.warning(f'Failed to find match order:{match_id}')
             else:
                 results.append(match)
                 results.append(self.deliminator)
+                continue
         return results

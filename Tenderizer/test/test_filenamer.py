@@ -75,11 +75,11 @@ class TestFileNamer(unittest.TestCase):
             self.str_multiple_match_groups,
             flags=re.M | re.S)
         fn.deliminator = ' '
-        fn.match_order = [1, 2, 3]
+        fn.match_order = ['1', '2', '3']
         name = fn.new_file_name(self.prefix, self.suffix, match)
         self.assertEqual(
             name, 'DWG XXX XXX(6) Services Lighting and Controls Level 6 Rev 05.pdf')
-        fn.match_order = [1, 3, 2]
+        fn.match_order = ['1', '3', '2']
         fn.deliminator = '.'
         name = fn.new_file_name(self.prefix, self.suffix, match)
         self.assertEqual(

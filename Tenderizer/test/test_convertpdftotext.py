@@ -66,7 +66,7 @@ class TestRegexEntry(TKinterTestCase, PDFToTextTestCase):
         self.pump_events()
         dataset_files = [i.output_path.name for i in covnert_pdftotext.dataset]
         output_files = [i.name for i in self.output_dir.iterdir()]
-        self.assertEquals(dataset_files, output_files)
+        self.assertEqual(dataset_files, output_files)
         self.assertNotIn(
             False, [i.converted for i in covnert_pdftotext.dataset])
 

@@ -27,7 +27,7 @@ class TestBrowseDir(TKinterTestCase):
         browse_dir = BrowseDir(self.root, 'Input Directory')
         self.pump_events()
         browse_dir.entry.focus_set()
-        browse_dir.entry.insert(tk.END, r'\\')
+        browse_dir.entry.insert(tk.END, '\\')
         browse_dir.assert_dir()
         self.pump_events()
         self.assertEqual(browse_dir.error_msg.get(), '')

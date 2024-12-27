@@ -40,7 +40,7 @@ class TestRegexEntry(TKinterTestCase):
         tv = re_match_order.tree
         l = [(tv.set(k, 'Example Value'), k) for k in tv.get_children('')]
         self.pump_events()
-        self.assertEquals(expected_result, l)
+        self.assertEqual(expected_result, l)
 
     def test_match_order_preview(self):
         re_match_order = RegexMatchOrder(self.root)
@@ -55,13 +55,13 @@ class TestRegexEntry(TKinterTestCase):
         re_match_order.add_tree_view_items(self.match)
         entry.event_generate('<FocusIn>')
         self.pump_events()
-        self.assertEquals('', entry.get())
+        self.assertEqual('', entry.get())
         entry.insert(tk.END, '1,2,3')
         entry.event_generate('<KeyRelease>')
         re_match_order.option_menu_var.set('Space')
         re_match_order.compare_user_input()
         self.pump_events()
-        self.assertEquals(
+        self.assertEqual(
             re_match_order.preview_label_var.get(),
             expected_result)
-        self.assertEquals([1, 2, 3], re_match_order.match_order)
+        self.assertEqual(['1', '2', '3'], re_match_order.match_order)

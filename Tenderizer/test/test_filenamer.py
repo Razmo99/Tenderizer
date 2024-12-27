@@ -68,6 +68,23 @@ class TestFileNamer(unittest.TestCase):
         self.assertEqual(
             name, 'DWG XXX XXX(6) Services East West  North   Level 6.pdf')
 
+    def test_named_groups_work(self):
+        fn = self.file_namer
+        match = re.search(
+            r'Drawing Title(?P<Main>.*)Scale at A1.*?(Rev).*?(?P<Version>\d+)',
+            self.str_multiple_match_groups,
+            flags=re.M | re.S)
+        fn.deliminator = ' '
+        fn.match_order = ['Main', '2', 'Version']
+        name = fn.new_file_name(self.prefix, self.suffix, match)
+        self.assertEqual(
+            name, 'DWG XXX XXX(6) Services Lighting and Controls Level 6 Rev 05.pdf')
+        fn.match_order = ['Main', 'Version', '2']
+        fn.deliminator = '.'
+        name = fn.new_file_name(self.prefix, self.suffix, match)
+        self.assertEqual(
+            name, 'DWG.XXX.XXX(6).Services.Lighting.and.Controls.Level.6.05.Rev.pdf')
+
     def test_match_order_is_correct(self):
         fn = self.file_namer
         match = re.search(
